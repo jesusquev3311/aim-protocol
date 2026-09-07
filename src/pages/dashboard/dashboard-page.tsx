@@ -1,7 +1,8 @@
-import { BarChart3, CalendarDays, ChevronRight, Crown, Flag, Gamepad2, Plus, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Award, BarChart3, CalendarDays, ChevronRight, Flag, Gamepad2, LockKeyhole, Plus, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useChallengeAchievementProgress } from "@/features/achievements/hooks/use-achievements";
 import { useChallenges, useFinishChallenge, useResetChallenge } from "@/features/challenges/hooks/use-challenges";
 import { useChallengeStatistics, useGlobalStatistics } from "@/features/statistics/hooks/use-statistics";
 import { useTrainingOverview } from "@/features/training/hooks/use-training";
@@ -34,13 +35,13 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
   const navigate = useNavigate();
   const overview = useTrainingOverview(challenge.id);
   const statistics = useChallengeStatistics(challenge.id);
+  const achievements = useChallengeAchievementProgress(challenge.id);
   const finishMutation = useFinishChallenge();
   const resetMutation = useResetChallenge();
   const startDate = new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(`${challenge.start_date}T00:00:00`));
   const currentDay = overview.data ? getCurrentTrainingDay(overview.data.days) : null;
   const currentMatches = currentDay ? overview.data?.matches.filter((match) => match.training_day_id === currentDay.id) ?? [] : [];
   const completedDays = overview.data?.days.filter((day) => day.status === "completed").length ?? 0;
-  const progress = Math.round((completedDays / challenge.duration_days) * 100);
   const finish = async () => {
     const confirmed = window.confirm("Finish this challenge now? Incomplete days will remain incomplete, and the current results will be finalized.");
     if (!confirmed) return;
@@ -69,7 +70,7 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
             <Metric icon={<Target className="h-5 w-5 text-primary" />} label="Current day's K/D" value={calculateAverageKd(currentMatches).toFixed(2)} />
             <Metric icon={<CalendarDays className="h-5 w-5 text-primary" />} label="Days completed" value={`${completedDays} / ${challenge.duration_days}`} />
           </div>
-          <ChallengeProgressTrack completedDays={completedDays} durationDays={challenge.duration_days} progress={progress} />
+          <ChallengeProgressTrack achievements={achievements.data ?? []} completedDays={completedDays} durationDays={challenge.duration_days} isLoading={achievements.isPending} />
           <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-5"><div className="flex gap-5 text-sm text-muted-foreground"><span>{completedDays} days completed</span><span className="flex items-center gap-1"><Sparkles className="h-4 w-4" />Recommended mode {challenge.recommended_mode ? "on" : "off"}</span></div>{challenge.status === "completed" ? <div className="flex gap-3"><Link to={`/challenges/${challenge.id}/analytics`} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-semibold hover:bg-muted">Analytics</Link><Link to={`/challenges/${challenge.id}/completed`} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground">View results</Link></div> : currentDay && <Link to={`/training/${currentDay.id}`} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Open current training</Link>}</div>
           {overview.isError && <p role="alert" className="text-sm text-red-400">Could not load training progress.</p>}
         </CardContent>
@@ -80,9 +81,19 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
   );
 }
 
-function ChallengeProgressTrack({ completedDays, durationDays, progress }: { completedDays: number; durationDays: number; progress: number }) {
-  const tiers = [0, 25, 50, 75, 100];
-  return <div className="rounded-lg border bg-background/50 px-5 pb-5 pt-4"><div className="mb-5 flex items-center justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-wider text-primary">Protocol pass</p><p className="mt-1 text-sm text-muted-foreground">{completedDays} / {durationDays} days completed</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">Tier {Math.min(4, Math.floor(progress / 25)) + 1}</span></div><div className="relative px-2"><div className="absolute left-2 right-2 top-4 h-2 rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-all" style={{ width: `${progress}%` }} /></div><div className="relative flex justify-between">{tiers.map((tier, index) => { const reached = progress >= tier; return <div key={tier} className="flex w-10 flex-col items-center"><span className={`z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold ${reached ? "border-primary bg-primary text-primary-foreground shadow-[0_0_18px_hsl(var(--primary)/0.45)]" : "border-border bg-card text-muted-foreground"}`}>{index === tiers.length - 1 ? <Crown className="h-4 w-4" /> : index + 1}</span><span className="mt-2 whitespace-nowrap text-[10px] text-muted-foreground">{tier}%</span></div>; })}</div></div></div>;
+type AchievementProgress = NonNullable<ReturnType<typeof useChallengeAchievementProgress>["data"]>;
+
+function ChallengeProgressTrack({ achievements, completedDays, durationDays, isLoading }: { achievements: AchievementProgress; completedDays: number; durationDays: number; isLoading: boolean }) {
+  if (isLoading) return <div className="rounded-lg border bg-background/50 p-5 text-sm text-muted-foreground">Loading achievement pass…</div>;
+  const trackAchievements = achievements.filter((achievement) => achievement.milestone_days !== null || achievement.code === "challenge-complete");
+  const milestones = new Map<number, AchievementProgress>();
+  for (const achievement of trackAchievements) {
+    const day = achievement.milestone_days ?? durationDays;
+    milestones.set(day, [...(milestones.get(day) ?? []), achievement]);
+  }
+  const rewards = [...milestones.entries()].sort(([dayA], [dayB]) => dayA - dayB);
+  const progress = Math.min(100, (completedDays / durationDays) * 100);
+  return <div className="rounded-lg border bg-background/50 px-5 pb-5 pt-4"><div className="mb-5 flex items-center justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-wider text-primary">Protocol pass</p><p className="mt-1 text-sm text-muted-foreground">Complete days to reach achievement milestones.</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">Day {completedDays} / {durationDays}</span></div><div className="overflow-x-auto pb-2"><div className="relative h-32 min-w-[760px] px-4"><div className="absolute left-8 right-8 top-5 h-2 rounded-full bg-muted"><div className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-all" style={{ width: `${progress}%` }} /></div>{rewards.map(([day, dayAchievements]) => { const unlocked = dayAchievements.every((achievement) => achievement.unlockedAt); const label = dayAchievements.map((achievement) => achievement.name).join(" + "); return <div key={day} className="absolute top-0 flex w-28 -translate-x-1/2 flex-col items-center text-center" style={{ left: `${Math.max(4, (day / durationDays) * 92)}%` }}><span title={dayAchievements.map((achievement) => `${achievement.name}: ${achievement.description}`).join("\n")} className={`inline-flex h-12 w-12 items-center justify-center rounded-full border-2 ${unlocked ? "border-primary bg-primary text-primary-foreground shadow-[0_0_18px_hsl(var(--primary)/0.55)]" : "border-border bg-muted text-muted-foreground"}`}>{unlocked ? <Award className="h-5 w-5" /> : <LockKeyhole className="h-4 w-4" />}</span><span className="mt-2 text-xs font-semibold">Day {day}</span><span className="mt-1 text-[10px] leading-tight text-muted-foreground">{label}</span></div>; })}</div></div></div>;
 }
 
 function DashboardAnalytics() {

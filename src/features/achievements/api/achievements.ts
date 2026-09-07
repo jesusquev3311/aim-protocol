@@ -15,12 +15,16 @@ export async function getChallengeAchievements(challengeId: string) {
 }
 
 export async function getChallengeAchievementProgress(challengeId: string) {
-  const [achievementsResponse, unlocksResponse] = await Promise.all([
-    supabase.from("achievements").select("id, code, name, description, icon").order("id"),
+  const [achievementsResponse, unlocksResponse, challengeResponse] = await Promise.all([
+    supabase.from("achievements").select("id, code, name, description, icon, milestone_days").order("id"),
     supabase.from("challenge_achievements").select("achievement_id, unlocked_at").eq("challenge_id", challengeId),
+    supabase.from("challenges").select("duration_days").eq("id", challengeId).single(),
   ]);
   if (achievementsResponse.error) throw achievementsResponse.error;
   if (unlocksResponse.error) throw unlocksResponse.error;
+  if (challengeResponse.error) throw challengeResponse.error;
   const unlockedAt = new Map(unlocksResponse.data.map((unlock) => [unlock.achievement_id, unlock.unlocked_at]));
-  return achievementsResponse.data.map((achievement) => ({ ...achievement, unlockedAt: unlockedAt.get(achievement.id) ?? null }));
+  return achievementsResponse.data
+    .filter((achievement) => achievement.milestone_days === null || achievement.milestone_days <= challengeResponse.data.duration_days)
+    .map((achievement) => ({ ...achievement, unlockedAt: unlockedAt.get(achievement.id) ?? null }));
 }

@@ -127,8 +127,8 @@ export type Database = {
         Relationships: [];
       };
       achievements: {
-        Row: { id: number; code: string; name: string; description: string; icon: string; created_at: string };
-        Insert: { id?: never; code: string; name: string; description: string; icon: string; created_at?: string };
+        Row: { id: number; code: string; name: string; description: string; icon: string; milestone_days: number | null; created_at: string };
+        Insert: { id?: never; code: string; name: string; description: string; icon: string; milestone_days?: number | null; created_at?: string };
         Update: never;
         Relationships: [];
       };
