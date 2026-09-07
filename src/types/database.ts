@@ -2,8 +2,8 @@ export type Database = {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; username: string; created_at: string };
-        Insert: { id: string; username: string; created_at?: string };
+        Row: { id: string; username: string; created_at: string; updated_at: string };
+        Insert: { id: string; username: string; created_at?: string; updated_at?: string };
         Update: { username?: string };
         Relationships: [];
       };
@@ -23,6 +23,7 @@ export type Database = {
           status: "active" | "completed" | "abandoned";
           recommended_mode: boolean;
           created_at: string;
+          completed_at: string | null;
         };
         Insert: {
           id?: string;
@@ -33,6 +34,7 @@ export type Database = {
           status?: "active" | "completed" | "abandoned";
           recommended_mode?: boolean;
           created_at?: string;
+          completed_at?: string | null;
         };
         Update: {
           duration_days?: number;
@@ -40,6 +42,7 @@ export type Database = {
           start_date?: string;
           status?: "active" | "completed" | "abandoned";
           recommended_mode?: boolean;
+          completed_at?: string | null;
         };
         Relationships: [];
       };
@@ -55,7 +58,8 @@ export type Database = {
           challenge_id: string;
           day_number: number;
           date: string;
-          status: "pending" | "partial" | "completed";
+          status: "pending" | "completed";
+          completed_at: string | null;
           notes: string | null;
           created_at: string;
         };
@@ -64,11 +68,12 @@ export type Database = {
           challenge_id: string;
           day_number: number;
           date: string;
-          status?: "pending" | "partial" | "completed";
+          status?: "pending" | "completed";
+          completed_at?: string | null;
           notes?: string | null;
           created_at?: string;
         };
-        Update: { notes?: string | null; status?: "pending" | "partial" | "completed" };
+        Update: { notes?: string | null; status?: "pending" | "completed"; completed_at?: string | null };
         Relationships: [];
       };
       deathmatches: {
@@ -121,6 +126,18 @@ export type Database = {
         Update: { result?: "poor" | "average" | "good" };
         Relationships: [];
       };
+      achievements: {
+        Row: { id: number; code: string; name: string; description: string; icon: string; created_at: string };
+        Insert: { id?: never; code: string; name: string; description: string; icon: string; created_at?: string };
+        Update: never;
+        Relationships: [];
+      };
+      challenge_achievements: {
+        Row: { challenge_id: string; achievement_id: number; unlocked_at: string };
+        Insert: { challenge_id: string; achievement_id: number; unlocked_at?: string };
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -135,9 +152,11 @@ export type Database = {
         Returns: string;
       };
       set_training_day_status: {
-        Args: { p_training_day_id: string; p_status: "pending" | "partial" };
+        Args: { p_training_day_id: string; p_status: "pending" | "completed" };
         Returns: string;
       };
+      finish_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
+      reset_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

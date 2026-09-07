@@ -23,6 +23,8 @@ export function useAddDeathmatch(trainingDayId: string, challengeId: string) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: trainingKeys.day(trainingDayId) }),
         queryClient.invalidateQueries({ queryKey: trainingKeys.overview(challengeId) }),
+        queryClient.invalidateQueries({ queryKey: ["challenges"] }),
+        queryClient.invalidateQueries({ queryKey: ["achievements", challengeId] }),
       ]);
     },
   });
@@ -36,6 +38,7 @@ export function useUpdateDeathmatch(trainingDayId: string, challengeId: string) 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: trainingKeys.day(trainingDayId) }),
         queryClient.invalidateQueries({ queryKey: trainingKeys.overview(challengeId) }),
+        queryClient.invalidateQueries({ queryKey: ["statistics", challengeId] }),
       ]);
     },
   });
@@ -65,6 +68,8 @@ export function useSetTrainingDayStatus() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: trainingKeys.day(variables.trainingDayId) }),
         queryClient.invalidateQueries({ queryKey: trainingKeys.overview(variables.challengeId) }),
+        queryClient.invalidateQueries({ queryKey: ["challenges"] }),
+        queryClient.invalidateQueries({ queryKey: ["achievements", variables.challengeId] }),
       ]);
     },
   });

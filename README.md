@@ -1,6 +1,8 @@
 # Valorant Training
 
-Phase 3 of the MVP: authentication, challenge creation and management, generated and browsable training days, full and partial day completion, historical Deathmatch entry and editing, daily skill evaluations, notes, dashboard progress, and Row Level Security.
+Aim Protocol is a Valorant mechanical-training tracker built with React, TypeScript, TanStack Query, and Supabase. It supports authentication, challenge management, browsable training days, historical Deathmatch entry, daily skill evaluations, profile management, achievements, and performance analytics.
+
+Challenge progress is based on completed training days. The configured Deathmatch count is a daily maximum rather than a completion requirement: a player can complete a day after recording at least one match, and reaching the maximum completes it automatically. Each day stores its actual completion timestamp, so challenges do not require consecutive calendar-day play.
 
 ## Getting Started
 
@@ -53,11 +55,22 @@ If email confirmation is enabled in Supabase, registration creates the account, 
 
 Environment variable changes only affect new deployments, so redeploy the project after changing them.
 
+## Product Areas
+
+- Dashboard progress, match volume, and current training day
+- Challenge creation, date editing, deletion, and daily match caps
+- Match entry and editing for current or historical training days
+- Explicit day completion and actual completion timestamps
+- Username, email, and password management with current-password confirmation
+- Challenge completion summary and persistent achievements
+- K/D trends, weapon comparisons, skill self-evaluations, and improvement insights
+
 ## Available Commands
 
 ```bash
 npm run dev      # Start the development server
 npm run build    # Type-check and create a production build
 npm run lint     # Run ESLint
+npm run test     # Run unit tests
 npm run preview  # Preview the production build
 ```

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository contains a Valorant mechanical-training web application. The current implementation is Phase 3 of the MVP: authentication, challenge creation, generated training days, Deathmatch recording, daily skill evaluations and notes, dashboard progress, and Row Level Security.
+This repository contains a Valorant mechanical-training web application. The current implementation extends Phase 3 of the MVP with authentication, profiles, challenge creation, generated training days, Deathmatch recording, explicit day completion, daily skill evaluations and notes, achievements, analytics, dashboard progress, and Row Level Security.
 
 Build the product incrementally. Do not implement later phases unless the task explicitly requests them.
 
@@ -25,6 +25,7 @@ Use the existing dependencies unless a task genuinely requires another package. 
 npm install
 npm run dev
 npm run lint
+npm run test
 npm run build
 npm run preview
 ```
@@ -33,10 +34,11 @@ Before handing off code changes, run at least:
 
 ```bash
 npm run lint
+npm run test
 npm run build
 ```
 
-There is no automated test suite yet. When tests are introduced, add a documented `test` script and keep tests close to the feature they cover.
+Keep unit tests close to the feature they cover and use Vitest for pure business rules and other isolated modules.
 
 ## Environment Setup
 
@@ -151,11 +153,13 @@ The browser client is defined in `src/lib/supabase/client.ts` and must remain th
 Preserve these MVP rules when implementing later phases:
 
 - Challenge durations: 5, 7, 15, 20, 30, or 60 days; default to 20.
-- Deathmatches per day: any whole number from 1 through 10; default to 5.
+- Maximum Deathmatches per day: any whole number from 1 through 10; default to 5. This is a cap, not a minimum.
 - Initially, a user may have only one active challenge.
 - Recommended sequence: Sheriff for matches 1–2, Guardian for matches 3–4, then Vandal or Phantom.
 - Skill results are `poor`, `average`, or `good`.
-- Training day statuses are `pending`, `partial`, or `completed`; partial days require at least one recorded match.
+- Training day statuses are `pending` or `completed`. Manual completion requires at least one recorded match; reaching the daily maximum completes the day automatically.
+- Preserve `training_days.completed_at` when a day is completed so progress reflects actual play cadence rather than planned calendar dates.
+- Challenge progress is completed days divided by duration. Match volume and K/D are separate performance measures.
 - Challenge statuses are `active`, `completed`, or `abandoned`.
 - Baseline consists of 3–5 normal Deathmatches and is optional.
 - K/D is calculated as kills divided by deaths and is never the primary stored value.

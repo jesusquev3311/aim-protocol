@@ -4,7 +4,7 @@ import type { DeathmatchValues, SkillResult } from "@/features/training/schemas/
 export async function getTrainingOverview(challengeId: string) {
   const { data: days, error: daysError } = await supabase
     .from("training_days")
-    .select("id, day_number, date, status, notes")
+    .select("id, day_number, date, status, completed_at, notes")
     .eq("challenge_id", challengeId)
     .order("day_number");
   if (daysError) throw daysError;
@@ -23,13 +23,13 @@ export async function getTrainingOverview(challengeId: string) {
 export async function getTrainingDay(trainingDayId: string) {
   const { data: day, error: dayError } = await supabase
     .from("training_days")
-    .select("id, challenge_id, day_number, date, status, notes")
+    .select("id, challenge_id, day_number, date, status, completed_at, notes")
     .eq("id", trainingDayId)
     .single();
   if (dayError) throw dayError;
 
   const [challengeResponse, matchesResponse, challengeSkillsResponse, resultsResponse] = await Promise.all([
-    supabase.from("challenges").select("id, duration_days, matches_per_day, recommended_mode").eq("id", day.challenge_id).single(),
+    supabase.from("challenges").select("id, duration_days, matches_per_day, recommended_mode, status, completed_at").eq("id", day.challenge_id).single(),
     supabase.from("deathmatches").select("id, match_number, weapon, kills, deaths, rating, notes, created_at").eq("training_day_id", day.id).order("match_number"),
     supabase.from("challenge_skills").select("skill_id").eq("challenge_id", day.challenge_id),
     supabase.from("skill_results").select("id, skill_id, result").eq("training_day_id", day.id),
@@ -94,7 +94,7 @@ export async function saveSkillResult({ trainingDayId, skillId, result }: { trai
   if (error) throw error;
 }
 
-export async function setTrainingDayStatus({ trainingDayId, status }: { trainingDayId: string; challengeId: string; status: "pending" | "partial" }) {
+export async function setTrainingDayStatus({ trainingDayId, status }: { trainingDayId: string; challengeId: string; status: "pending" | "completed" }) {
   const { data, error } = await supabase.rpc("set_training_day_status", {
     p_training_day_id: trainingDayId,
     p_status: status,

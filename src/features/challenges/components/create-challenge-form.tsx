@@ -39,8 +39,8 @@ export function CreateChallengeForm() {
 
   const onSubmit = async (values: CreateChallengeValues) => {
     try {
-      await createMutation.mutateAsync(values);
-      navigate("/dashboard", { replace: true });
+      const challengeId = await createMutation.mutateAsync(values);
+      navigate(`/challenges/${challengeId}`, { replace: true });
     } catch {
       // The mutation state renders the Supabase error below the form.
     }
@@ -64,7 +64,7 @@ export function CreateChallengeForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="matchesPerDay">Deathmatches per day</Label>
+        <Label htmlFor="matchesPerDay">Maximum Deathmatches per day</Label>
         <Controller
           control={control}
           name="matchesPerDay"
@@ -82,7 +82,7 @@ export function CreateChallengeForm() {
             </select>
           )}
         />
-        <p className="text-sm text-muted-foreground">Choose a realistic daily target between 1 and 10.</p>
+        <p className="text-sm text-muted-foreground">This is a daily cap, not a minimum. You can complete a day after recording at least one match.</p>
         <FieldError message={errors.matchesPerDay?.message} />
       </div>
 

@@ -11,9 +11,39 @@ export async function getSkills() {
 export async function getActiveChallenge() {
   const { data, error } = await supabase
     .from("challenges")
-    .select("id, duration_days, matches_per_day, start_date, status, recommended_mode, created_at")
+    .select("id, duration_days, matches_per_day, start_date, status, recommended_mode, created_at, completed_at")
     .eq("status", "active")
     .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getLatestChallenge() {
+  const { data, error } = await supabase
+    .from("challenges")
+    .select("id, duration_days, matches_per_day, start_date, status, recommended_mode, created_at, completed_at")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getChallenges() {
+  const { data, error } = await supabase
+    .from("challenges")
+    .select("id, duration_days, matches_per_day, start_date, status, recommended_mode, created_at, completed_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function getChallenge(challengeId: string) {
+  const { data, error } = await supabase
+    .from("challenges")
+    .select("id, duration_days, matches_per_day, start_date, status, recommended_mode, created_at, completed_at")
+    .eq("id", challengeId)
+    .single();
   if (error) throw error;
   return data;
 }
@@ -43,5 +73,15 @@ export async function updateChallenge({ challengeId, values }: { challengeId: st
 
 export async function deleteChallenge(challengeId: string) {
   const { error } = await supabase.from("challenges").delete().eq("id", challengeId);
+  if (error) throw error;
+}
+
+export async function finishChallenge(challengeId: string) {
+  const { error } = await supabase.rpc("finish_challenge", { p_challenge_id: challengeId });
+  if (error) throw error;
+}
+
+export async function resetChallenge(challengeId: string) {
+  const { error } = await supabase.rpc("reset_challenge", { p_challenge_id: challengeId });
   if (error) throw error;
 }
