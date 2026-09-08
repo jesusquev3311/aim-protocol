@@ -17,7 +17,7 @@ export function ChallengeCompletedPage() {
   if (challenge.data.status !== "completed") return <p className="text-muted-foreground">Complete every training day to unlock this result screen.</p>;
 
   const reset = async () => {
-    const confirmed = window.confirm("Reset this completed challenge? All matches, evaluations, notes, completion dates, and achievements will be permanently erased. This cannot be undone.");
+    const confirmed = window.confirm("Reset this completed challenge from today? Its full schedule will move to today. All matches, evaluations, notes, completion dates, and achievements will be permanently erased. This cannot be undone.");
     if (!confirmed) return;
     try { await resetMutation.mutateAsync(challengeId); navigate("/dashboard"); } catch { /* Mutation feedback is shown below. */ }
   };

@@ -156,7 +156,7 @@ export type Database = {
         Returns: string;
       };
       finish_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
-      reset_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
+      reset_challenge: { Args: { p_challenge_id: string; p_start_date: string }; Returns: undefined };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

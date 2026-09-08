@@ -53,7 +53,7 @@ export function ChallengeCard({ challenge }: { challenge: Challenge }) {
     }
   };
   const resetChallenge = async () => {
-    const confirmed = window.confirm("Reset this challenge? All matches, evaluations, notes, completion dates, and achievements will be permanently erased. This cannot be undone.");
+    const confirmed = window.confirm("Reset this challenge from today? Its start date and training-day schedule will move to today. All matches, evaluations, notes, completion dates, and achievements will be permanently erased. This cannot be undone.");
     if (!confirmed) return;
     try { await resetMutation.mutateAsync(challenge.id); } catch { /* Mutation feedback is rendered below. */ }
   };

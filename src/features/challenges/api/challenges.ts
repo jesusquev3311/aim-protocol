@@ -82,6 +82,8 @@ export async function finishChallenge(challengeId: string) {
 }
 
 export async function resetChallenge(challengeId: string) {
-  const { error } = await supabase.rpc("reset_challenge", { p_challenge_id: challengeId });
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+  const { error } = await supabase.rpc("reset_challenge", { p_challenge_id: challengeId, p_start_date: localDate });
   if (error) throw error;
 }
