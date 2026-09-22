@@ -64,6 +64,7 @@ Environment variable changes only affect new deployments, so redeploy the projec
 - Username, email, and password management with current-password confirmation
 - Challenge completion summary and persistent achievements
 - K/D trends, weapon comparisons, skill self-evaluations, and improvement insights
+- Daily 30-minute mechanics routine, gunfight-hygiene checklist, ranked weekly target, and training streak
 
 ## Available Commands
 

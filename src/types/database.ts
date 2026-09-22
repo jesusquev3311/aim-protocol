@@ -138,6 +138,29 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      routine_sessions: {
+        Row: {
+          id: string; user_id: string; session_date: string;
+          overaim_bots: number; underaim_bots: number; flick_bots: number;
+          microflick_minutes: number; practice_minutes: number; deathmatches: number; ranked_matches: number;
+          shooting_error_graph: boolean; stop_before_shooting: boolean; no_crouch_spray: boolean; burst_strafe: boolean;
+          notes: string | null; completed_at: string | null; created_at: string; updated_at: string;
+        };
+        Insert: {
+          id?: string; user_id: string; session_date: string;
+          overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
+          microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
+          shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
+          notes?: string | null; completed_at?: string | null; created_at?: string; updated_at?: string;
+        };
+        Update: {
+          session_date?: string; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
+          microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
+          shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
+          notes?: string | null; completed_at?: string | null; updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
