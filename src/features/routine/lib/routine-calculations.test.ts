@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { calculateRoutineProgress, calculateWeeklyRanked, isRoutineComplete } from "@/features/routine/lib/routine-calculations";
+import { calculateRoutineProgress, calculateWeeklyRanked } from "@/features/routine/lib/routine-calculations";
 
 describe("routine calculations", () => {
-  it("completes the routine only after every drill and thirty minutes", () => {
-    const complete = { overaimBots: 30, underaimBots: 30, flickBots: 30, microflickMinutes: 3, practiceMinutes: 30 };
-    expect(isRoutineComplete(complete)).toBe(true);
-    expect(calculateRoutineProgress(complete)).toBe(100);
-    expect(isRoutineComplete({ ...complete, practiceMinutes: 29 })).toBe(false);
+  it("treats bot values as scores from a 30-bot run", () => {
+    const maximumResult = { overaimBots: 30, underaimBots: 30, flickBots: 30, microflickMinutes: 3, practiceMinutes: 30 };
+    expect(calculateRoutineProgress(maximumResult)).toBe(100);
+    expect(calculateRoutineProgress({ ...maximumResult, overaimBots: 15 })).toBe(90);
   });
 
   it("counts ranked matches only inside the selected calendar week", () => {

@@ -6,10 +6,6 @@ export function calculateRoutineProgress(values: RoutineProgressInput) {
   return Math.round((ratios.reduce((sum, ratio) => sum + Math.min(1, ratio), 0) / ratios.length) * 100);
 }
 
-export function isRoutineComplete(values: RoutineProgressInput) {
-  return values.overaimBots >= 30 && values.underaimBots >= 30 && values.flickBots >= 30 && values.microflickMinutes >= 3 && values.practiceMinutes >= 30;
-}
-
 export function getWeekBounds(date: string) {
   const value = new Date(`${date}T12:00:00`);
   const day = value.getDay();
