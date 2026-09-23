@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getRoutineHistory, getRoutineSession, saveRoutineSession } from "@/features/routine/api/routine";
+import { finishRoutineSession, getRoutineHistory, getRoutineSession, saveRoutineSession } from "@/features/routine/api/routine";
 
 export const routineKeys = {
   all: ["routine"] as const,
@@ -22,6 +22,19 @@ export function useSaveRoutineSession() {
     onSuccess: async (session) => {
       queryClient.setQueryData(routineKeys.session(session.session_date), session);
       await queryClient.invalidateQueries({ queryKey: routineKeys.all });
+    },
+  });
+}
+
+export function useFinishRoutineSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: finishRoutineSession,
+    onSuccess: async (_completedAt, sessionDate) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: routineKeys.session(sessionDate) }),
+        queryClient.invalidateQueries({ queryKey: routineKeys.all }),
+      ]);
     },
   });
 }

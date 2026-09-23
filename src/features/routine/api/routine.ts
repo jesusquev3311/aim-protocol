@@ -35,3 +35,9 @@ export async function saveRoutineSession({ userId, values }: { userId: string; v
   if (error) throw error;
   return data;
 }
+
+export async function finishRoutineSession(sessionDate: string) {
+  const { data, error } = await supabase.rpc("finish_routine_session", { p_session_date: sessionDate });
+  if (error) throw error;
+  return data;
+}

@@ -1,10 +1,12 @@
-import { Award, BarChart3, CalendarDays, ChevronRight, Flag, Gamepad2, LockKeyhole, Plus, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Award, BarChart3, CalendarDays, CheckCircle2, ChevronRight, Dumbbell, Flag, Gamepad2, LockKeyhole, Plus, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChallengeAchievementProgress } from "@/features/achievements/hooks/use-achievements";
 import { useChallenges, useFinishChallenge, useResetChallenge } from "@/features/challenges/hooks/use-challenges";
 import { useChallengeStatistics, useGlobalStatistics } from "@/features/statistics/hooks/use-statistics";
+import { useRoutineSession } from "@/features/routine/hooks/use-routine";
+import { calculateRoutineProgress } from "@/features/routine/lib/routine-calculations";
 import { useTrainingOverview } from "@/features/training/hooks/use-training";
 import { calculateAverageKd, getCurrentTrainingDay } from "@/features/training/lib/training-calculations";
 import { cn } from "@/lib/utils";
@@ -24,9 +26,25 @@ export function DashboardPage() {
     <section className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-widest text-primary">Dashboard</p><h1 className="mt-2 text-3xl font-bold">Your training overview</h1><p className="mt-2 text-muted-foreground">Review your latest performance and open any challenge.</p></div>{challengesQuery.data.some((challenge) => challenge.status === "active") ? <Link to={`/challenges/${challengesQuery.data.find((challenge) => challenge.status === "active")?.id}`} className="inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-semibold hover:bg-muted">View active challenge<ChevronRight className="h-4 w-4" /></Link> : <Link to="/challenges/new" className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" />New challenge</Link>}</div>
       <DashboardAnalytics />
+      <CurrentRoutine />
       <ChallengeList challenges={challengesQuery.data} />
     </section>
   );
+}
+
+function CurrentRoutine() {
+  const today = getLocalDate();
+  const session = useRoutineSession(today);
+  if (session.isPending) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Loading today's routine…</CardContent></Card>;
+  if (session.isError) return <Card><CardContent className="pt-6 text-sm text-red-400">Could not load today's routine.</CardContent></Card>;
+  const data = session.data;
+  const progress = data ? calculateRoutineProgress({ overaimBots: data.overaim_bots, underaimBots: data.underaim_bots, flickBots: data.flick_bots, microflickMinutes: data.microflick_minutes, practiceMinutes: data.practice_minutes }) : 0;
+  return <Card className="border-primary/30"><CardHeader className="flex flex-row items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" /><CardTitle>Today's routine</CardTitle></div><CardDescription className="mt-2">30-minute mechanics protocol and ranked tracking.</CardDescription></div><Link to="/routine" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">{data ? "Open routine" : "Start routine"}<ChevronRight className="h-4 w-4" /></Link></CardHeader><CardContent className="space-y-4"><div className="grid gap-4 sm:grid-cols-3"><Metric icon={<Target className="h-5 w-5 text-primary" />} label="Achieved" value={`${progress}%`} /><Metric icon={<Gamepad2 className="h-5 w-5 text-primary" />} label="Practice volume" value={`${data?.practice_minutes ?? 0} min · ${data?.deathmatches ?? 0} DM`} /><Metric icon={<CheckCircle2 className="h-5 w-5 text-primary" />} label="Day status" value={data?.completed_at ? "Finished" : data ? "In progress" : "Not started"} /></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full transition-all ${data?.completed_at ? "bg-emerald-500" : "bg-primary"}`} style={{ width: `${progress}%` }} /></div></CardContent></Card>;
+}
+
+function getLocalDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }
 
 type Challenge = NonNullable<ReturnType<typeof useChallenges>["data"]>[number];
