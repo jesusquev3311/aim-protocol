@@ -27,7 +27,7 @@ Only use a Supabase publishable key in the frontend. Never expose a secret key t
 
 ## Authentication Notes
 
-If email confirmation is enabled in Supabase, registration creates the account, but the user must confirm their email before signing in. The application sends `/dashboard` as the email confirmation destination using the origin where registration occurred.
+If email confirmation is enabled in Supabase, registration opens a dedicated verification-sent page and the user must confirm their email before signing in. The application sends `/dashboard` as the confirmation destination. Password recovery emails return to `/reset-password`, where Supabase validates the recovery session before allowing a password change.
 
 ## Deploying to Vercel
 
