@@ -17,13 +17,15 @@ import { StatisticsPage } from "@/features/statistics/pages/statistics-page";
 import { ChallengeStatisticsPage } from "@/features/statistics/pages/challenge-statistics-page";
 import { RoutineDetailPage } from "@/features/routine/pages/routine-page";
 import { RoutineListPage } from "@/features/routine/pages/routine-list-page";
+import { CreateRoutineProgramPage } from "@/features/routine/pages/create-routine-program-page";
+import { RoutineProgramPage } from "@/features/routine/pages/routine-program-page";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
 import { ProtectedRoute, PublicOnlyRoute } from "./route-guards";
 
 const router = createBrowserRouter([
   { element: <PublicOnlyRoute />, children: [{ element: <AuthLayout />, children: [{ path: "/login", element: <LoginPage /> }, { path: "/register", element: <RegisterPage /> }, { path: "/verify-email", element: <VerifyEmailPage /> }, { path: "/forgot-password", element: <ForgotPasswordPage /> }] }] },
   { element: <AuthLayout />, children: [{ path: "/reset-password", element: <ResetPasswordPage /> }] },
-  { element: <ProtectedRoute />, children: [{ element: <AppLayout />, children: [{ path: "/dashboard", element: <DashboardPage /> }, { path: "/routine", element: <RoutineListPage /> }, { path: "/routine/:sessionDate", element: <RoutineDetailPage /> }, { path: "/profile", element: <ProfilePage /> }, { path: "/statistics", element: <StatisticsPage /> }, { path: "/challenges", element: <ChallengeListPage /> }, { path: "/challenges/new", element: <CreateChallengePage /> }, { path: "/challenges/:challengeId", element: <ChallengeDetailPage /> }, { path: "/challenges/:challengeId/analytics", element: <ChallengeStatisticsPage /> }, { path: "/challenges/:challengeId/settings", element: <ChallengeSettingsPage /> }, { path: "/challenges/:challengeId/completed", element: <ChallengeCompletedPage /> }, { path: "/training/:trainingDayId", element: <TrainingDayPage /> }] }] },
+  { element: <ProtectedRoute />, children: [{ element: <AppLayout />, children: [{ path: "/dashboard", element: <DashboardPage /> }, { path: "/routines", element: <RoutineListPage /> }, { path: "/routines/new", element: <CreateRoutineProgramPage /> }, { path: "/routines/:programId", element: <RoutineProgramPage /> }, { path: "/routines/:programId/days/:sessionId", element: <RoutineDetailPage /> }, { path: "/routine", element: <Navigate to="/routines" replace /> }, { path: "/profile", element: <ProfilePage /> }, { path: "/statistics", element: <StatisticsPage /> }, { path: "/challenges", element: <ChallengeListPage /> }, { path: "/challenges/new", element: <CreateChallengePage /> }, { path: "/challenges/:challengeId", element: <ChallengeDetailPage /> }, { path: "/challenges/:challengeId/analytics", element: <ChallengeStatisticsPage /> }, { path: "/challenges/:challengeId/settings", element: <ChallengeSettingsPage /> }, { path: "/challenges/:challengeId/completed", element: <ChallengeCompletedPage /> }, { path: "/training/:trainingDayId", element: <TrainingDayPage /> }] }] },
   { path: "/", element: <Navigate to="/dashboard" replace /> },
   { path: "*", element: <Navigate to="/dashboard" replace /> },
 ]);
