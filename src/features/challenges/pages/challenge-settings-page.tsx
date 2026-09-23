@@ -15,7 +15,7 @@ export function ChallengeSettingsPage() {
 
   if (activeChallenge.isPending) return <p className="text-sm text-muted-foreground">Loading challenge settings…</p>;
   if (activeChallenge.isError) return <p role="alert" className="text-sm text-red-400">Could not load the challenge.</p>;
-  if (!activeChallenge.data || activeChallenge.data.id !== challengeId) return <Navigate to="/dashboard" replace />;
+  if (!activeChallenge.data || activeChallenge.data.id !== challengeId) return <Navigate to="/challenges" replace />;
 
   return <ChallengeSettings challenge={activeChallenge.data} />;
 }
@@ -45,7 +45,7 @@ function ChallengeSettings({ challenge }: { challenge: Challenge }) {
     if (!confirmed) return;
     try {
       await deleteMutation.mutateAsync(challenge.id);
-      navigate("/dashboard", { replace: true });
+      navigate("/challenges", { replace: true });
     } catch {
       // The mutation state renders the Supabase error below the action.
     }
@@ -53,7 +53,7 @@ function ChallengeSettings({ challenge }: { challenge: Challenge }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Dashboard</Link>
+      <Link to={`/challenges/${challenge.id}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Challenge</Link>
       <Card>
         <CardHeader><CardTitle>Challenge settings</CardTitle><CardDescription>Changing the start date reschedules every generated training day while preserving your recorded data.</CardDescription></CardHeader>
         <CardContent>

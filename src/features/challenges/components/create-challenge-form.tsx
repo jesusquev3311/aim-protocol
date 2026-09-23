@@ -106,7 +106,7 @@ export function CreateChallengeForm() {
 
       {createMutation.isError && <p role="alert" className="text-sm text-red-400">{createMutation.error.message}</p>}
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="ghost" onClick={() => navigate("/dashboard")}>Cancel</Button>
+        <Button type="button" variant="ghost" onClick={() => navigate("/challenges")}>Cancel</Button>
         <Button type="submit" disabled={createMutation.isPending || skillsQuery.isPending}>{createMutation.isPending ? "Creating…" : "Create challenge"}</Button>
       </div>
     </form>

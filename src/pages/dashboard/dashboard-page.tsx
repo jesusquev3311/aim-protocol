@@ -1,8 +1,9 @@
-import { Award, BarChart3, CalendarDays, CheckCircle2, ChevronRight, Dumbbell, Flag, Gamepad2, LockKeyhole, Plus, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Award, BarChart3, CalendarDays, CheckCircle2, ChevronRight, Dumbbell, Flag, Gamepad2, LockKeyhole, RotateCcw, Settings, Sparkles, Target, TrendingUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChallengeAchievementProgress } from "@/features/achievements/hooks/use-achievements";
+import { ChallengeList } from "@/features/challenges/components/challenge-list";
 import { useChallenges, useFinishChallenge, useResetChallenge } from "@/features/challenges/hooks/use-challenges";
 import { useChallengeStatistics, useGlobalStatistics } from "@/features/statistics/hooks/use-statistics";
 import { useRoutineSession } from "@/features/routine/hooks/use-routine";
@@ -24,10 +25,10 @@ export function DashboardPage() {
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-sm font-semibold uppercase tracking-widest text-primary">Dashboard</p><h1 className="mt-2 text-3xl font-bold">Your training overview</h1><p className="mt-2 text-muted-foreground">Review your latest performance and open any challenge.</p></div>{challengesQuery.data.some((challenge) => challenge.status === "active") ? <Link to={`/challenges/${challengesQuery.data.find((challenge) => challenge.status === "active")?.id}`} className="inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-semibold hover:bg-muted">View active challenge<ChevronRight className="h-4 w-4" /></Link> : <Link to="/challenges/new" className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" />New challenge</Link>}</div>
+      <div><p className="text-sm font-semibold uppercase tracking-widest text-primary">Dashboard</p><h1 className="mt-2 text-3xl font-bold">Your training overview</h1><p className="mt-2 text-muted-foreground">Review your latest performance, routine, and challenge progress.</p></div>
       <DashboardAnalytics />
       <CurrentRoutine />
-      <ChallengeList challenges={challengesQuery.data} />
+      <ChallengeList challenges={challengesQuery.data} limit={3} footerHref="/challenges" />
     </section>
   );
 }
@@ -119,12 +120,6 @@ function DashboardAnalytics() {
   return <AnalyticsSummary analyticsHref="/statistics" statistics={statistics} title="Global analytics" />;
 }
 
-function ChallengeList({ challenges }: { challenges: Challenge[] }) {
-  if (!challenges.length) return <EmptyChallengeState />;
-  return <Card><CardHeader className="flex flex-row items-start justify-between gap-4"><div><CardTitle>Challenges</CardTitle><CardDescription className="mt-2">Active and completed training protocols.</CardDescription></div>{!challenges.some((challenge) => challenge.status === "active") && <Link to="/challenges/new" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground"><Plus className="h-4 w-4" />New challenge</Link>}</CardHeader><CardContent className="space-y-3">{challenges.map((challenge) => { const startDate = new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(`${challenge.start_date}T00:00:00`)); return <div key={challenge.id} className="flex flex-wrap items-center justify-between gap-4 rounded-md border p-4"><div><div className="flex items-center gap-3"><span className="font-semibold">{challenge.duration_days}-day challenge</span><StatusBadge status={challenge.status} /></div><p className="mt-1 text-sm text-muted-foreground">Started {startDate} · Up to {challenge.matches_per_day} matches per day</p></div><div className="flex gap-2"><Link to={`/challenges/${challenge.id}/analytics`} className="inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium hover:bg-muted"><BarChart3 className="h-4 w-4" />Analytics</Link><Link to={`/challenges/${challenge.id}`} className="inline-flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">Open<ChevronRight className="h-4 w-4" /></Link></div></div>; })}</CardContent></Card>;
-}
-
-function StatusBadge({ status }: { status: Challenge["status"] }) { const style = status === "active" ? "bg-primary/10 text-primary" : status === "completed" ? "bg-emerald-500/10 text-emerald-400" : "bg-muted text-muted-foreground"; return <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${style}`}>{status}</span>; }
 
 type StatisticsQuery = ReturnType<typeof useChallengeStatistics>;
 
@@ -157,15 +152,6 @@ function TrainingCalendar({ days, matches, dailyTarget, currentDayId }: { days: 
           );
         })}
       </CardContent>
-    </Card>
-  );
-}
-
-function EmptyChallengeState() {
-  return (
-    <Card className="mt-8 border-dashed">
-      <CardHeader><CardTitle>No active challenge</CardTitle><CardDescription>Configure your schedule and choose the skills you want to practice.</CardDescription></CardHeader>
-      <CardContent><Link to="/challenges/new" className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Create a challenge</Link></CardContent>
     </Card>
   );
 }

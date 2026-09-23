@@ -19,7 +19,7 @@ export function ChallengeCompletedPage() {
   const reset = async () => {
     const confirmed = window.confirm("Reset this completed challenge from today? Its full schedule will move to today. All matches, evaluations, notes, completion dates, and achievements will be permanently erased. This cannot be undone.");
     if (!confirmed) return;
-    try { await resetMutation.mutateAsync(challengeId); navigate("/dashboard"); } catch { /* Mutation feedback is shown below. */ }
+    try { await resetMutation.mutateAsync(challengeId); navigate(`/challenges/${challengeId}`); } catch { /* Mutation feedback is shown below. */ }
   };
 
   return <section className="space-y-8"><div className="rounded-xl border border-primary/40 bg-primary/10 p-8 text-center"><PartyPopper className="mx-auto h-10 w-10 text-primary" /><p className="mt-4 text-sm font-semibold uppercase tracking-widest text-primary">Challenge finished</p><h1 className="mt-2 text-4xl font-bold">You completed {stats.data.completedDays} of {challenge.data.duration_days} training days</h1><p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Your completed dates, match volume, and performance data are saved for review.</p></div>

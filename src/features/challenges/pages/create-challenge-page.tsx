@@ -7,7 +7,7 @@ export function CreateChallengePage() {
   const activeChallenge = useActiveChallenge();
   if (activeChallenge.isPending) return <p className="text-sm text-muted-foreground">Checking your challenges…</p>;
   if (activeChallenge.isError) return <p role="alert" className="text-sm text-red-400">Could not check your active challenge. Try refreshing the page.</p>;
-  if (activeChallenge.data) return <Navigate to="/dashboard" replace />;
+  if (activeChallenge.data) return <Navigate to="/challenges" replace />;
 
   return (
     <div className="mx-auto max-w-3xl">
