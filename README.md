@@ -27,7 +27,7 @@ Only use a Supabase publishable key in the frontend. Never expose a secret key t
 
 ## Authentication Notes
 
-If email confirmation is enabled in Supabase, registration creates the account, but the user must confirm their email before signing in. Configure the appropriate development and production redirect URLs under Supabase Auth settings.
+If email confirmation is enabled in Supabase, registration creates the account, but the user must confirm their email before signing in. The application sends `/dashboard` as the email confirmation destination using the origin where registration occurred.
 
 ## Deploying to Vercel
 
@@ -49,8 +49,8 @@ If email confirmation is enabled in Supabase, registration creates the account, 
 
 5. Deploy the project. The root-level `vercel.json` rewrites application routes to `index.html`, allowing React Router URLs such as `/dashboard` and `/training/:trainingDayId` to work after a direct refresh.
 6. In **Supabase → Authentication → URL Configuration**:
-   - Set **Site URL** to the production Vercel URL.
-   - Add the exact production URL to **Redirect URLs**.
+   - Set **Site URL** to `https://aim-protocol-umber.vercel.app` (do not use a `vercel.com` account or signup URL).
+   - Add `https://aim-protocol-umber.vercel.app/**` to **Redirect URLs** so confirmation links can return to `/dashboard`.
    - Keep `http://localhost:5173/**` as an additional redirect for local development.
 
 Environment variable changes only affect new deployments, so redeploy the project after changing them.

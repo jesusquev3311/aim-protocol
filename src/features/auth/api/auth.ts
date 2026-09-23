@@ -4,12 +4,16 @@ type SignUpInput = { email: string; password: string; username: string };
 type SignInInput = Pick<SignUpInput, "email" | "password">;
 
 export async function signUp({ email, password, username }: SignUpInput) {
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username } },
+    options: {
+      data: { username },
+      emailRedirectTo: new URL("/dashboard", window.location.origin).toString(),
+    },
   });
   if (error) throw error;
+  return { requiresEmailConfirmation: data.session === null };
 }
 
 export async function signIn({ email, password }: SignInInput) {
