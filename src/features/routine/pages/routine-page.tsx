@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProgressStepper, type ProgressStep } from "@/components/ui/progress-stepper";
 import { useFinishRoutineDay, useRoutineSessionById, useSaveRoutineSession, useStartRoutineSession } from "@/features/routine/hooks/use-routine";
 import { calculateRoutineProgress } from "@/features/routine/lib/routine-calculations";
 import { routineSchema, type RoutineValues } from "@/features/routine/schemas/routine-schema";
@@ -46,6 +47,7 @@ export function RoutineDetailPage() {
   const progressValues = { ...values, practiceMinutes: timerMinutes };
   const progress = calculateRoutineProgress(progressValues);
   const dayFinished = Boolean(session.data?.completed_at);
+  const routineSteps = buildRoutineSteps(values, Boolean(session.data.started_at), dayFinished);
   const save = async (formValues: RoutineValues) => { try { await saveMutation.mutateAsync({ sessionId, values: formValues }); } catch { /* Feedback renders below. */ } };
   const finishDay = async (formValues: RoutineValues) => {
     const confirmed = window.confirm(`Finish this routine day at ${calculateRoutineProgress({ ...formValues, practiceMinutes: timerMinutes })}%? The timer will record ${timerMinutes} total session ${timerMinutes === 1 ? "minute" : "minutes"}.`);
@@ -61,7 +63,7 @@ export function RoutineDetailPage() {
   return <section className="space-y-8"><div><Link to={`/routines/${programId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Routine Program</Link><div className="mt-6"><p className="text-sm font-semibold uppercase tracking-widest text-primary">Routine day {session.data.day_number}</p><h1 className="mt-2 text-3xl font-bold">30-minute mechanics protocol</h1><p className="mt-2 max-w-3xl text-muted-foreground">{session.data.session_date ? `Completed ${formatLongDate(session.data.session_date)} · ` : ""}Start timing before the Range exercises, then play Deathmatch until the whole session reaches approximately 30 minutes.</p></div></div>
     <div className="grid gap-4 sm:grid-cols-2"><Metric icon={<Timer />} label="Routine result" value={`${progress}%`} detail={dayFinished ? "Day finished · result recorded" : "Session still open"} /><Metric icon={<Play />} label="Whole-session timer" value={session.data.started_at ? formatElapsed(session.data.started_at, session.data.completed_at, now) : "Not started"} detail={session.data.started_at ? `Started at ${formatStartTime(session.data.started_at)} · target 30:00 · maximum 45:00` : "Includes Range, microflicks, and Deathmatch"} /></div>
     {!session.data.started_at && <Card className="border-primary/30"><CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6"><div><p className="font-semibold">Start the complete training session</p><p className="mt-1 text-sm text-muted-foreground">Start this before exercise 1. Deathmatch is the final portion of the same 30-minute session.</p></div><Button type="button" disabled={startMutation.isPending} onClick={() => startMutation.mutate(sessionId)}><Play className="mr-2 h-4 w-4" />{startMutation.isPending ? "Starting…" : "Start routine"}</Button></CardContent></Card>}
-    <Card className={dayFinished ? "border-emerald-500/40" : "border-primary/30"}><CardContent className="pt-6"><div className="mb-2 flex justify-between text-sm"><span>{dayFinished ? "Day finished · achieved result recorded" : "Current routine result"}</span><span>{progress}%</span></div><div className="h-3 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full transition-all ${dayFinished ? "bg-emerald-500" : "bg-primary"}`} style={{ width: `${progress}%` }} /></div>{dayFinished && session.data?.completed_at && <p className="mt-3 text-xs text-muted-foreground">Finished {new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(session.data.completed_at))}</p>}</CardContent></Card>
+    <Card className={dayFinished ? "border-emerald-500/40" : "border-primary/30"}><CardHeader><div className="flex items-center justify-between gap-4"><div><CardTitle className="text-lg">Routine stages</CardTitle><CardDescription>{dayFinished ? "Every stage is complete and the result is recorded." : "Move through the drills in order, then finish with Deathmatch."}</CardDescription></div><span className="shrink-0 text-sm font-semibold text-primary">{progress}% result</span></div></CardHeader><CardContent><ProgressStepper steps={routineSteps} ariaLabel="Routine stage progress" />{dayFinished && session.data?.completed_at && <p className="mt-3 text-xs text-muted-foreground">Finished {new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(session.data.completed_at))}</p>}</CardContent></Card>
     <form className="space-y-6" onSubmit={handleSubmit(save)}>
       <div className="grid gap-5 lg:grid-cols-2">
         <DrillCard number="01" title="Overaim + correction" target="One Easy run · 30 bots maximum · Vandal" description="Pass the head, correct back, stop completely, then fire." icon={<Crosshair />}><NumberField id="overaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.overaimBots?.message} input={register("overaimBots", { valueAsNumber: true })} /></DrillCard>
@@ -85,3 +87,23 @@ function formatStartTime(date: string) { return new Intl.DateTimeFormat("en", { 
 function formatElapsed(startedAt: string, completedAt: string | null, now: number) { const elapsedSeconds = Math.min(45 * 60, Math.max(0, Math.floor(((completedAt ? new Date(completedAt).getTime() : now) - new Date(startedAt).getTime()) / 1_000))); const minutes = Math.floor(elapsedSeconds / 60); const seconds = elapsedSeconds % 60; return `${minutes}:${seconds.toString().padStart(2, "0")}`; }
 function calculateTimerMinutes(startedAt: string, completedAt: string | null, now: number) { const elapsedMilliseconds = Math.max(0, (completedAt ? new Date(completedAt).getTime() : now) - new Date(startedAt).getTime()); return Math.min(45, Math.ceil(elapsedMilliseconds / 60_000)); }
 function getLocalDate() { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10); }
+function buildRoutineSteps(values: RoutineValues, timerStarted: boolean, dayFinished: boolean): ProgressStep[] {
+  const reached = [
+    timerStarted,
+    values.overaimBots > 0 || values.underaimBots > 0 || values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
+    values.underaimBots > 0 || values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
+    values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
+    values.microflickMinutes > 0 || values.deathmatches > 0,
+    dayFinished,
+  ];
+  const labels: Array<readonly [string, string]> = [
+    ["Start", "Whole-session timer"],
+    ["Overaim", "30-bot run"],
+    ["Underaim", "30-bot run"],
+    ["Flick", "30-bot run"],
+    ["Microflicks", "About 3 minutes"],
+    ["Deathmatch", "Finish the day"],
+  ];
+  const currentIndex = dayFinished ? -1 : reached.findIndex((stepReached) => !stepReached);
+  return labels.map(([label, description], index) => ({ id: label.toLowerCase(), label, description, status: dayFinished || reached[index] ? "completed" : index === currentIndex ? "current" : "upcoming" }));
+}
