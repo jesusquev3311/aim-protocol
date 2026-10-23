@@ -54,7 +54,6 @@ export async function saveRoutineSession({ sessionId, values }: { sessionId: str
     underaim_bots: values.underaimBots,
     flick_bots: values.flickBots,
     microflick_minutes: values.microflickMinutes,
-    practice_minutes: values.practiceMinutes,
     deathmatches: values.deathmatches,
     ranked_matches: values.rankedMatches,
     shooting_error_graph: values.shootingErrorGraph,
