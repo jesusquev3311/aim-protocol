@@ -19,11 +19,13 @@ function GlobalRoutineAnalytics({ challengeDays }: { challengeDays: StatisticsRe
   const [toDate, setToDate] = useState("");
   const filtered = useMemo(() => {
     if (!query.data) return [];
-    return query.data.sessions.filter((session) => (programId === "all" || session.routine_program_id === programId) && (!fromDate || (session.session_date ?? "") >= fromDate) && (!toDate || (session.session_date ?? "") <= toDate));
+    const mechanicsPrograms = new Set(query.data.programs.filter((program) => program.template_code === "mechanics_protocol").map((program) => program.id));
+    return query.data.sessions.filter((session) => mechanicsPrograms.has(session.routine_program_id ?? "") && (programId === "all" || session.routine_program_id === programId) && (!fromDate || (session.session_date ?? "") >= fromDate) && (!toDate || (session.session_date ?? "") <= toDate));
   }, [fromDate, programId, query.data, toDate]);
   if (query.isPending) return <p className="text-sm text-muted-foreground">Analyzing routine history…</p>;
   if (query.isError) return <p role="alert" className="text-sm text-red-400">Could not load routine analytics.</p>;
-  const target = programId === "all" ? query.data.programs.reduce((total, program) => total + program.duration_days, 0) : query.data.programs.find((program) => program.id === programId)?.duration_days ?? filtered.length;
+  const mechanicsPrograms = query.data.programs.filter((program) => program.template_code === "mechanics_protocol");
+  const target = programId === "all" ? mechanicsPrograms.reduce((total, program) => total + program.duration_days, 0) : mechanicsPrograms.find((program) => program.id === programId)?.duration_days ?? filtered.length;
   const statistics = buildRoutineStatistics(filtered, target);
   const routineDates = new Set(statistics.activityDates);
   const routineDayKd = challengeDays.filter((day) => day.completedAt && routineDates.has(day.completedAt.slice(0, 10))).map((day) => day.averageKd);

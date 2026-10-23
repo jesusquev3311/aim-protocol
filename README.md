@@ -67,7 +67,9 @@ Environment variable changes only affect new deployments, so redeploy the projec
 - Username, email, and password management with current-password confirmation
 - Challenge completion summary and persistent achievements
 - K/D trends, weapon comparisons, skill self-evaluations, and improvement insights
-- Flexible 7-, 15-, or 30-session Routine Programs with actual completion dates, timer-derived session duration capped at 45 minutes, bot scores, jiggle-peek and A/D burst drills, optional accuracy and Deathmatch context, and gunfight-hygiene tracking
+- Immutable Routine Program templates selected at creation: Routine A Mechanics Protocol or Routine B Corner Strafe Benchmark
+- Routine B supports 5 or 7 timed 100-bot sets per corner, Vandal-to-Sheriff recommendations, partial day completion, side comparison, and timing analytics
+- Flexible 7-, 15-, or 30-session programs with actual completion dates, preserved history, and template-specific results
 - Per-program and global routine analytics with rolling mechanical trends, baseline comparisons, consistency, adherence, date/program filters, and routine-to-Deathmatch associations
 
 ## Available Commands

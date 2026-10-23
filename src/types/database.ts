@@ -141,11 +141,13 @@ export type Database = {
       routine_programs: {
         Row: {
           id: string; user_id: string; name: string; start_date: string; duration_days: 7 | 15 | 30;
+          template_code: "mechanics_protocol" | "corner_strafe_benchmark"; sets_per_side: 5 | 7 | null;
           weekdays: number[]; status: "active" | "completed" | "abandoned";
           completed_at: string | null; created_at: string;
         };
         Insert: {
           id?: string; user_id: string; name: string; start_date: string; duration_days: 7 | 15 | 30;
+          template_code?: "mechanics_protocol" | "corner_strafe_benchmark"; sets_per_side?: 5 | 7 | null;
           weekdays: number[]; status?: "active" | "completed" | "abandoned";
           completed_at?: string | null; created_at?: string;
         };
@@ -153,6 +155,12 @@ export type Database = {
           name?: string; start_date?: string; duration_days?: 7 | 15 | 30; weekdays?: number[];
           status?: "active" | "completed" | "abandoned"; completed_at?: string | null;
         };
+        Relationships: [];
+      };
+      routine_benchmark_sets: {
+        Row: { id: string; routine_session_id: string; side: "left" | "right"; set_number: number; weapon: "Vandal" | "Sheriff"; bots_completed: number; duration_seconds: number | null; execution_quality: "clean" | "mixed" | "rushed" | null; created_at: string; updated_at: string };
+        Insert: { id?: string; routine_session_id: string; side: "left" | "right"; set_number: number; weapon?: "Vandal" | "Sheriff"; bots_completed?: number; duration_seconds?: number | null; execution_quality?: "clean" | "mixed" | "rushed" | null; created_at?: string; updated_at?: string };
+        Update: { weapon?: "Vandal" | "Sheriff"; bots_completed?: number; duration_seconds?: number | null; execution_quality?: "clean" | "mixed" | "rushed" | null; updated_at?: string };
         Relationships: [];
       };
       routine_sessions: {
@@ -204,7 +212,7 @@ export type Database = {
       finish_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
       reset_challenge: { Args: { p_challenge_id: string; p_start_date: string }; Returns: undefined };
       finish_routine_session: { Args: { p_session_date: string }; Returns: string };
-      create_routine_program: { Args: { p_name: string; p_start_date: string; p_duration_days: number }; Returns: string };
+      create_routine_program: { Args: { p_name: string; p_start_date: string; p_duration_days: number; p_template_code: string; p_sets_per_side: number | null }; Returns: string };
       start_routine_session: { Args: { p_session_id: string }; Returns: string };
       finish_routine_day: { Args: { p_session_id: string; p_performed_on: string }; Returns: string };
       finish_routine_program: { Args: { p_program_id: string }; Returns: undefined };

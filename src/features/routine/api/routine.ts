@@ -3,7 +3,7 @@ import type { RoutineValues } from "@/features/routine/schemas/routine-schema";
 import type { RoutineProgramValues } from "@/features/routine/schemas/routine-program-schema";
 
 const sessionFields = "id, user_id, routine_program_id, day_number, session_date, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, peek_left_repetitions, peek_right_repetitions, strafe_close_repetitions, strafe_mid_repetitions, strafe_long_repetitions, practice_minutes, deathmatches, ranked_matches, warmup_hits, microflick_hits, deathmatch_kills, deathmatch_deaths, deathmatch_weapon, perceived_difficulty, confidence_before, confidence_after, session_focus, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe, notes, started_at, completed_at, created_at, updated_at" as const;
-const programFields = "id, user_id, name, start_date, duration_days, weekdays, status, completed_at, created_at" as const;
+const programFields = "id, user_id, name, start_date, duration_days, weekdays, template_code, sets_per_side, status, completed_at, created_at" as const;
 
 export async function getRoutinePrograms() {
   const { data, error } = await supabase.from("routine_programs").select(programFields).order("created_at", { ascending: false });
@@ -31,7 +31,19 @@ export async function getActiveRoutineProgram() {
 }
 
 export async function createRoutineProgram(values: RoutineProgramValues) {
-  const { data, error } = await supabase.rpc("create_routine_program", { p_name: values.name, p_start_date: values.startDate, p_duration_days: values.durationDays });
+  const { data, error } = await supabase.rpc("create_routine_program", { p_name: values.name, p_start_date: values.startDate, p_duration_days: values.durationDays, p_template_code: values.templateCode, p_sets_per_side: values.templateCode === "corner_strafe_benchmark" ? values.setsPerSide : null });
+  if (error) throw error;
+  return data;
+}
+
+export async function getBenchmarkSets(sessionId: string) {
+  const { data, error } = await supabase.from("routine_benchmark_sets").select("id, routine_session_id, side, set_number, weapon, bots_completed, duration_seconds, execution_quality, created_at, updated_at").eq("routine_session_id", sessionId).order("side").order("set_number");
+  if (error) throw error;
+  return data;
+}
+
+export async function saveBenchmarkSet(values: { routineSessionId: string; side: "left" | "right"; setNumber: number; weapon: "Vandal" | "Sheriff"; botsCompleted: number; durationSeconds: number | null; executionQuality: "clean" | "mixed" | "rushed" | null }) {
+  const { data, error } = await supabase.from("routine_benchmark_sets").upsert({ routine_session_id: values.routineSessionId, side: values.side, set_number: values.setNumber, weapon: values.weapon, bots_completed: values.botsCompleted, duration_seconds: values.durationSeconds, execution_quality: values.executionQuality, updated_at: new Date().toISOString() }, { onConflict: "routine_session_id,side,set_number" }).select("id, routine_session_id, side, set_number, weapon, bots_completed, duration_seconds, execution_quality, created_at, updated_at").single();
   if (error) throw error;
   return data;
 }

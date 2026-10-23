@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createRoutineProgram, finishRoutineDay, finishRoutineProgram, getActiveRoutineProgram, getRoutineHistory, getRoutineProgram, getRoutinePrograms, getRoutineSessionById, saveRoutineSession, startRoutineSession } from "@/features/routine/api/routine";
+import { createRoutineProgram, finishRoutineDay, finishRoutineProgram, getActiveRoutineProgram, getBenchmarkSets, getRoutineHistory, getRoutineProgram, getRoutinePrograms, getRoutineSessionById, saveBenchmarkSet, saveRoutineSession, startRoutineSession } from "@/features/routine/api/routine";
 
 export const routineKeys = {
   all: ["routine"] as const,
@@ -8,15 +8,22 @@ export const routineKeys = {
   program: (programId: string) => ["routine", "program", programId] as const,
   activeProgram: () => ["routine", "active-program"] as const,
   sessionById: (sessionId: string) => ["routine", "session-id", sessionId] as const,
+  benchmarkSets: (sessionId: string) => ["routine", "benchmark-sets", sessionId] as const,
 };
 
 export function useRoutinePrograms() { return useQuery({ queryKey: routineKeys.programs(), queryFn: getRoutinePrograms }); }
 export function useRoutineProgram(programId: string) { return useQuery({ queryKey: routineKeys.program(programId), queryFn: () => getRoutineProgram(programId), enabled: Boolean(programId) }); }
 export function useActiveRoutineProgram() { return useQuery({ queryKey: routineKeys.activeProgram(), queryFn: getActiveRoutineProgram }); }
 export function useRoutineSessionById(sessionId: string) { return useQuery({ queryKey: routineKeys.sessionById(sessionId), queryFn: () => getRoutineSessionById(sessionId), enabled: Boolean(sessionId) }); }
+export function useBenchmarkSets(sessionId: string) { return useQuery({ queryKey: routineKeys.benchmarkSets(sessionId), queryFn: () => getBenchmarkSets(sessionId), enabled: Boolean(sessionId) }); }
 
 export function useRoutineHistory(startDate: string) {
   return useQuery({ queryKey: routineKeys.history(startDate), queryFn: () => getRoutineHistory(startDate) });
+}
+
+export function useSaveBenchmarkSet() {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn: saveBenchmarkSet, onSuccess: async (set) => queryClient.invalidateQueries({ queryKey: routineKeys.benchmarkSets(set.routine_session_id) }) });
 }
 
 export function useSaveRoutineSession() {

@@ -9,12 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProgressStepper, type ProgressStep } from "@/components/ui/progress-stepper";
 import { useFinishRoutineDay, useRoutineSessionById, useSaveRoutineSession, useStartRoutineSession } from "@/features/routine/hooks/use-routine";
+import { useRoutineProgram } from "@/features/routine/hooks/use-routine";
+import { CornerStrafeDayPage } from "@/features/routine/pages/corner-strafe-day-page";
 import { calculateRoutineProgress } from "@/features/routine/lib/routine-calculations";
 import { routineSchema, type RoutineValues } from "@/features/routine/schemas/routine-schema";
 
 const emptyRoutine = (): RoutineValues => ({ flickWarmupMinutes: 0, overaimBots: 0, underaimBots: 0, flickBots: 0, microflickMinutes: 0, peekLeftRepetitions: 0, peekRightRepetitions: 0, strafeCloseRepetitions: 0, strafeMidRepetitions: 0, strafeLongRepetitions: 0, practiceMinutes: 0, deathmatches: 0, rankedMatches: 0, warmupHits: null, microflickHits: null, deathmatchKills: null, deathmatchDeaths: null, deathmatchWeapon: null, perceivedDifficulty: null, confidenceBefore: null, confidenceAfter: null, sessionFocus: null, shootingErrorGraph: false, stopBeforeShooting: false, noCrouchSpray: false, burstStrafe: false, notes: "" });
 
 export function RoutineDetailPage() {
+  const { programId = "", sessionId = "" } = useParams();
+  const program = useRoutineProgram(programId);
+  if (program.isPending) return <p className="text-sm text-muted-foreground">Loading routine template…</p>;
+  if (program.isError) return <p role="alert" className="text-sm text-red-400">Could not load this Routine Program.</p>;
+  if (program.data.program.template_code === "corner_strafe_benchmark" && program.data.program.sets_per_side) return <CornerStrafeDayPage programId={programId} sessionId={sessionId} setsPerSide={program.data.program.sets_per_side} />;
+  return <MechanicsRoutineDetailPage />;
+}
+
+function MechanicsRoutineDetailPage() {
   const { programId = "", sessionId = "" } = useParams();
   const session = useRoutineSessionById(sessionId);
   const saveMutation = useSaveRoutineSession();
