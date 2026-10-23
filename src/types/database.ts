@@ -158,20 +158,20 @@ export type Database = {
       routine_sessions: {
         Row: {
           id: string; user_id: string; routine_program_id: string | null; day_number: number | null; session_date: string | null;
-          overaim_bots: number; underaim_bots: number; flick_bots: number;
+          flick_warmup_minutes: number; overaim_bots: number; underaim_bots: number; flick_bots: number;
           microflick_minutes: number; practice_minutes: number; deathmatches: number; ranked_matches: number;
           shooting_error_graph: boolean; stop_before_shooting: boolean; no_crouch_spray: boolean; burst_strafe: boolean;
           notes: string | null; started_at: string | null; completed_at: string | null; created_at: string; updated_at: string;
         };
         Insert: {
           id?: string; user_id: string; routine_program_id?: string | null; day_number?: number | null; session_date?: string | null;
-          overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
+          flick_warmup_minutes?: number; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; created_at?: string; updated_at?: string;
         };
         Update: {
-          routine_program_id?: string | null; day_number?: number | null; session_date?: string | null; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
+          routine_program_id?: string | null; day_number?: number | null; session_date?: string | null; flick_warmup_minutes?: number; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; updated_at?: string;

@@ -12,7 +12,7 @@ import { useFinishRoutineDay, useRoutineSessionById, useSaveRoutineSession, useS
 import { calculateRoutineProgress } from "@/features/routine/lib/routine-calculations";
 import { routineSchema, type RoutineValues } from "@/features/routine/schemas/routine-schema";
 
-const emptyRoutine = (): RoutineValues => ({ overaimBots: 0, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0, deathmatches: 0, rankedMatches: 0, shootingErrorGraph: false, stopBeforeShooting: false, noCrouchSpray: false, burstStrafe: false, notes: "" });
+const emptyRoutine = (): RoutineValues => ({ flickWarmupMinutes: 0, overaimBots: 0, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0, deathmatches: 0, rankedMatches: 0, shootingErrorGraph: false, stopBeforeShooting: false, noCrouchSpray: false, burstStrafe: false, notes: "" });
 
 export function RoutineDetailPage() {
   const { programId = "", sessionId = "" } = useParams();
@@ -26,7 +26,7 @@ export function RoutineDetailPage() {
   useEffect(() => {
     const data = session.data;
     reset(data ? {
-      overaimBots: data.overaim_bots, underaimBots: data.underaim_bots, flickBots: data.flick_bots,
+      flickWarmupMinutes: data.flick_warmup_minutes, overaimBots: data.overaim_bots, underaimBots: data.underaim_bots, flickBots: data.flick_bots,
       microflickMinutes: data.microflick_minutes, practiceMinutes: data.practice_minutes, deathmatches: data.deathmatches,
       rankedMatches: data.ranked_matches, shootingErrorGraph: data.shooting_error_graph, stopBeforeShooting: data.stop_before_shooting,
       noCrouchSpray: data.no_crouch_spray, burstStrafe: data.burst_strafe, notes: data.notes ?? "",
@@ -67,10 +67,11 @@ export function RoutineDetailPage() {
     <Card className={dayFinished ? "border-emerald-500/40" : "border-primary/30"}><CardHeader><div className="flex items-center justify-between gap-4"><div><CardTitle className="text-lg">Routine stages</CardTitle><CardDescription>{dayFinished ? "Every stage is complete and the result is recorded." : "Move through the drills in order, then finish with Deathmatch."}</CardDescription></div><span className="shrink-0 text-sm font-semibold text-primary">{progress}% result</span></div></CardHeader><CardContent><ProgressStepper steps={routineSteps} ariaLabel="Routine stage progress" />{dayFinished && session.data?.completed_at && <p className="mt-3 text-xs text-muted-foreground">Finished {new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(session.data.completed_at))}</p>}</CardContent></Card>
     <form className="space-y-6" onSubmit={handleSubmit(save)}><fieldset disabled={!timerStarted} className="space-y-6 disabled:opacity-60">
       <div className="grid gap-5 lg:grid-cols-2">
-        <DrillCard number="01" title="Overaim + correction" target="One Easy run · 30 bots maximum · Vandal" description="Pass the head, correct back, stop completely, then fire." icon={<Crosshair />}><NumberField id="overaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.overaimBots?.message} input={register("overaimBots", { valueAsNumber: true })} /></DrillCard>
-        <DrillCard number="02" title="Underaim + movement" target="One Easy run · 30 bots maximum" description="Stop short with the mouse and use lateral movement to finish the alignment." icon={<MoveHorizontal />}><NumberField id="underaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.underaimBots?.message} input={register("underaimBots", { valueAsNumber: true })} /></DrillCard>
-        <DrillCard number="03" title="Flick + movement correction" target="One Easy run · 30 bots maximum" description="Flick toward the head; correct small misses with movement instead of only the mouse." icon={<Crosshair />}><NumberField id="flickBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.flickBots?.message} input={register("flickBots", { valueAsNumber: true })} /></DrillCard>
-        <DrillCard number="04" title="Microflicks" target="Approximately 3 minutes" description="Move immediately between two nearby bots without waiting to confirm the first kill." icon={<Timer />}><NumberField id="microflickMinutes" label="Minutes" target="Target: 3" error={errors.microflickMinutes?.message} input={register("microflickMinutes", { valueAsNumber: true })} /></DrillCard>
+        <DrillCard number="01" title="Flick warm-up" target="3–10 minutes" description="Flick between two bots, make a controlled micro-adjustment, and shoot only when the crosshair is settled on the head." icon={<Crosshair />}><NumberField id="flickWarmupMinutes" label="Minutes completed" target="Between 3 and 10 minutes" max={10} error={errors.flickWarmupMinutes?.message} input={register("flickWarmupMinutes", { valueAsNumber: true })} /></DrillCard>
+        <DrillCard number="02" title="Overaim + correction" target="One Easy run · 30 bots maximum · Vandal" description="Pass the head, correct back, stop completely, then fire." icon={<Crosshair />}><NumberField id="overaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.overaimBots?.message} input={register("overaimBots", { valueAsNumber: true })} /></DrillCard>
+        <DrillCard number="03" title="Underaim + movement" target="One Easy run · 30 bots maximum" description="Stop short with the mouse and use lateral movement to finish the alignment." icon={<MoveHorizontal />}><NumberField id="underaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.underaimBots?.message} input={register("underaimBots", { valueAsNumber: true })} /></DrillCard>
+        <DrillCard number="04" title="Flick + movement correction" target="One Easy run · 30 bots maximum" description="Flick toward the head; correct small misses with movement instead of only the mouse." icon={<Crosshair />}><NumberField id="flickBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.flickBots?.message} input={register("flickBots", { valueAsNumber: true })} /></DrillCard>
+        <DrillCard number="05" title="Microflicks" target="Approximately 3 minutes" description="Move immediately between two nearby bots without waiting to confirm the first kill." icon={<Timer />}><NumberField id="microflickMinutes" label="Minutes" target="Target: 3" error={errors.microflickMinutes?.message} input={register("microflickMinutes", { valueAsNumber: true })} /></DrillCard>
       </div>
       <Card><CardHeader><CardTitle>Deathmatch and total training time</CardTitle><CardDescription>After completing the Range and microflick exercises, play Deathmatch only until the entire session reaches approximately 30 minutes. The timer stops counting at 45 minutes.</CardDescription></CardHeader><CardContent className="grid gap-5 sm:grid-cols-3"><div className="space-y-2"><Label>Total session minutes</Label><div className="flex h-10 items-center rounded-md border bg-muted/30 px-3 text-sm font-medium">{timerMinutes} min</div><p className="text-xs text-muted-foreground">Calculated automatically from the whole-session timer</p></div><NumberField id="deathmatches" label="Deathmatches played" target="Final portion of the session" error={errors.deathmatches?.message} input={register("deathmatches", { valueAsNumber: true })} /><NumberField id="rankedMatches" label="Ranked matches" target="Weekly target: 14" error={errors.rankedMatches?.message} input={register("rankedMatches", { valueAsNumber: true })} /></CardContent></Card>
       <Card><CardHeader><CardTitle>Gunfight hygiene</CardTitle><CardDescription>Use the Shooting Error Graph and judge execution quality, not Deathmatch placement.</CardDescription></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2">{[["shootingErrorGraph", "Shooting Error Graph enabled"], ["stopBeforeShooting", "Completely stopped before firing"], ["noCrouchSpray", "Avoided crouch spraying"], ["burstStrafe", "Used 2 bullets → strafe → 2 bullets"]].map(([name, label]) => <label key={name} className="flex items-center gap-3 rounded-md border p-4 text-sm"><input type="checkbox" className="h-4 w-4 accent-[hsl(var(--primary))]" {...register(name as "shootingErrorGraph" | "stopBeforeShooting" | "noCrouchSpray" | "burstStrafe")} /><CheckCircle2 className="h-4 w-4 text-primary" />{label}</label>)}</CardContent></Card>
@@ -91,6 +92,7 @@ function getLocalDate() { const now = new Date(); return new Date(now.getTime() 
 function buildRoutineSteps(values: RoutineValues, timerStarted: boolean, dayFinished: boolean): ProgressStep[] {
   const labels: Array<readonly [string, string]> = [
     ["Start", "Whole-session timer"],
+    ["Warm-up", "Flick + micro-adjust"],
     ["Overaim", "30-bot run"],
     ["Underaim", "30-bot run"],
     ["Flick", "30-bot run"],
@@ -100,6 +102,7 @@ function buildRoutineSteps(values: RoutineValues, timerStarted: boolean, dayFini
   if (!timerStarted) return labels.map(([label, description], index) => ({ id: label.toLowerCase(), label, description, status: index === 0 ? "current" : "upcoming" }));
   const reached = [
     timerStarted,
+    values.flickWarmupMinutes > 0 || values.overaimBots > 0 || values.underaimBots > 0 || values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
     values.overaimBots > 0 || values.underaimBots > 0 || values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
     values.underaimBots > 0 || values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,
     values.flickBots > 0 || values.microflickMinutes > 0 || values.deathmatches > 0,

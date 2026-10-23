@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const routineSchema = z.object({
+  flickWarmupMinutes: z.number().int().refine((value) => value === 0 || (value >= 3 && value <= 10), "Record between 3 and 10 minutes."),
   overaimBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),
   underaimBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),
   flickBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),

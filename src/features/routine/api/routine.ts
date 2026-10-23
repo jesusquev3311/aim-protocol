@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { RoutineValues } from "@/features/routine/schemas/routine-schema";
 import type { RoutineProgramValues } from "@/features/routine/schemas/routine-program-schema";
 
-const sessionFields = "id, user_id, routine_program_id, day_number, session_date, overaim_bots, underaim_bots, flick_bots, microflick_minutes, practice_minutes, deathmatches, ranked_matches, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe, notes, started_at, completed_at, created_at, updated_at" as const;
+const sessionFields = "id, user_id, routine_program_id, day_number, session_date, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, practice_minutes, deathmatches, ranked_matches, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe, notes, started_at, completed_at, created_at, updated_at" as const;
 const programFields = "id, user_id, name, start_date, duration_days, weekdays, status, completed_at, created_at" as const;
 
 export async function getRoutinePrograms() {
@@ -50,6 +50,7 @@ export async function getRoutineHistory(startDate: string) {
 
 export async function saveRoutineSession({ sessionId, values }: { sessionId: string; values: RoutineValues }) {
   const { data, error } = await supabase.from("routine_sessions").update({
+    flick_warmup_minutes: values.flickWarmupMinutes,
     overaim_bots: values.overaimBots,
     underaim_bots: values.underaimBots,
     flick_bots: values.flickBots,
