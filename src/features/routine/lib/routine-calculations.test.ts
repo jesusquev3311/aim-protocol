@@ -8,6 +8,10 @@ describe("routine calculations", () => {
     expect(calculateRoutineProgress({ ...maximumResult, overaimBots: 15 })).toBe(90);
   });
 
+  it("treats cleared numeric inputs as zero instead of returning NaN", () => {
+    expect(calculateRoutineProgress({ overaimBots: Number.NaN, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0 })).toBe(0);
+  });
+
   it("counts ranked matches only inside the selected calendar week", () => {
     const sessions = [
       { session_date: "2026-09-21", ranked_matches: 2, completed_at: null },

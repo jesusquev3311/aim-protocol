@@ -2,8 +2,12 @@ type RoutineProgressInput = { overaimBots: number; underaimBots: number; flickBo
 type RoutineHistoryItem = { session_date: string; ranked_matches: number; completed_at: string | null };
 
 export function calculateRoutineProgress(values: RoutineProgressInput) {
-  const ratios = [values.overaimBots / 30, values.underaimBots / 30, values.flickBots / 30, values.microflickMinutes / 3, values.practiceMinutes / 30];
+  const ratios = [safeRatio(values.overaimBots, 30), safeRatio(values.underaimBots, 30), safeRatio(values.flickBots, 30), safeRatio(values.microflickMinutes, 3), safeRatio(values.practiceMinutes, 30)];
   return Math.round((ratios.reduce((sum, ratio) => sum + Math.min(1, ratio), 0) / ratios.length) * 100);
+}
+
+function safeRatio(value: number, target: number) {
+  return Number.isFinite(value) && value > 0 ? value / target : 0;
 }
 
 export function getWeekBounds(date: string) {
