@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout/app-layout";
 import { AuthLayout } from "@/components/layout/auth-layout";
+import { MarketingLayout } from "@/components/layout/marketing-layout";
 import { LoginPage } from "@/features/auth/pages/login-page";
 import { RegisterPage } from "@/features/auth/pages/register-page";
 import { ForgotPasswordPage } from "@/features/auth/pages/forgot-password-page";
@@ -21,13 +22,14 @@ import { RoutineListPage } from "@/features/routine/pages/routine-list-page";
 import { CreateRoutineProgramPage } from "@/features/routine/pages/create-routine-program-page";
 import { RoutineProgramPage } from "@/features/routine/pages/routine-program-page";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
+import { LandingPage } from "@/features/landing/pages/landing-page";
 import { ProtectedRoute, PublicOnlyRoute } from "./route-guards";
 
 const router = createBrowserRouter([
+  { element: <MarketingLayout />, children: [{ path: "/", element: <LandingPage /> }] },
   { element: <PublicOnlyRoute />, children: [{ element: <AuthLayout />, children: [{ path: "/login", element: <LoginPage /> }, { path: "/register", element: <RegisterPage /> }, { path: "/verify-email", element: <VerifyEmailPage /> }, { path: "/forgot-password", element: <ForgotPasswordPage /> }] }] },
   { element: <AuthLayout />, children: [{ path: "/reset-password", element: <ResetPasswordPage /> }] },
   { element: <ProtectedRoute />, children: [{ element: <AppLayout />, children: [{ path: "/dashboard", element: <DashboardPage /> }, { path: "/routines", element: <RoutineListPage /> }, { path: "/routines/new", element: <CreateRoutineProgramPage /> }, { path: "/routines/:programId", element: <RoutineProgramPage /> }, { path: "/routines/:programId/analytics", element: <RoutineStatisticsPage /> }, { path: "/routines/:programId/days/:sessionId", element: <RoutineDetailPage /> }, { path: "/routine", element: <Navigate to="/routines" replace /> }, { path: "/profile", element: <ProfilePage /> }, { path: "/statistics", element: <StatisticsPage /> }, { path: "/challenges", element: <ChallengeListPage /> }, { path: "/challenges/new", element: <CreateChallengePage /> }, { path: "/challenges/:challengeId", element: <ChallengeDetailPage /> }, { path: "/challenges/:challengeId/analytics", element: <ChallengeStatisticsPage /> }, { path: "/challenges/:challengeId/settings", element: <ChallengeSettingsPage /> }, { path: "/challenges/:challengeId/completed", element: <ChallengeCompletedPage /> }, { path: "/training/:trainingDayId", element: <TrainingDayPage /> }] }] },
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
   { path: "*", element: <Navigate to="/dashboard" replace /> },
 ]);
 

@@ -18,5 +18,10 @@
   }
 
   * { @apply border-border; }
+  html { scroll-behavior: smooth; }
   body { @apply min-h-screen bg-background text-foreground antialiased; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }

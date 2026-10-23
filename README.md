@@ -2,6 +2,8 @@
 
 Aim Protocol is a Valorant mechanical-training tracker built with React, TypeScript, TanStack Query, and Supabase. It supports authentication, challenge management, browsable training days, historical Deathmatch entry, daily skill evaluations, profile management, achievements, and performance analytics.
 
+The public root route presents the product and adapts its primary action to the current authentication state. Authenticated application data remains behind protected routes and is never loaded into the marketing preview.
+
 Challenge progress is based on completed training days. The configured Deathmatch count is a daily maximum rather than a completion requirement: a player can complete a day after recording at least one match, and reaching the maximum completes it automatically. Each day stores its actual completion timestamp, so challenges do not require consecutive calendar-day play.
 
 ## Getting Started
@@ -58,6 +60,7 @@ Environment variable changes only affect new deployments, so redeploy the projec
 ## Product Areas
 
 - Dashboard progress, match volume, and current training day
+- Public product landing page with authentication-aware calls to action
 - Challenge creation, date editing, deletion, and daily match caps
 - Match entry and editing for current or historical training days
 - Explicit day completion and actual completion timestamps
