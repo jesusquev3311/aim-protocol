@@ -16,6 +16,7 @@ export type RoutineAnalyticsSession = {
   strafe_long_repetitions: number;
   practice_minutes: number;
   deathmatches: number;
+  ranked_matches: number;
   warmup_hits: number | null;
   microflick_hits: number | null;
   deathmatch_kills: number | null;
@@ -72,6 +73,18 @@ export function buildRoutineStatistics(sessions: RoutineAnalyticsSession[], targ
   const microflickResults = completed.filter((session) => session.microflick_hits !== null);
   const difficultyResults = completed.filter((session) => session.perceived_difficulty !== null);
   const activeWeeks = new Set(dates.map(startOfWeek));
+  const deathmatchTrend = deathmatchSessions.map((session, index) => ({ session: session.day_number ?? index + 1, date: session.session_date!, kd: ratio(session.deathmatch_kills ?? 0, session.deathmatch_deaths ?? 0) }));
+  const weaponGroups = new Map<string, { kills: number; deaths: number; sessions: number }>();
+  for (const session of deathmatchSessions) {
+    const weapon = session.deathmatch_weapon?.trim() || "Not specified";
+    const current = weaponGroups.get(weapon) ?? { kills: 0, deaths: 0, sessions: 0 };
+    weaponGroups.set(weapon, { kills: current.kills + (session.deathmatch_kills ?? 0), deaths: current.deaths + (session.deathmatch_deaths ?? 0), sessions: current.sessions + 1 });
+  }
+  const deathmatchWeapons = [...weaponGroups].map(([name, result]) => ({ name, kd: ratio(result.kills, result.deaths), sessions: result.sessions })).sort((a, b) => b.kd - a.kd);
+  const rankedWeeks = buildRankedWeeks(completed);
+  const currentWeek = startOfWeek(toDateString(new Date()));
+  const currentWeekRanked = rankedWeeks.find((week) => week.week === currentWeek)?.matches ?? 0;
+  const rankedStreaks = calculateTargetStreaks(rankedWeeks);
   const insights: string[] = [];
   if (completed.length < 3) insights.push(`Complete ${3 - completed.length} more ${3 - completed.length === 1 ? "session" : "sessions"} to unlock a reliable baseline comparison.`);
   else {
@@ -95,6 +108,15 @@ export function buildRoutineStatistics(sessions: RoutineAnalyticsSession[], targ
     totalDeathmatches: sum(completed.map((session) => session.deathmatches)),
     routineKd: deaths === 0 ? kills : kills / deaths,
     routineKdSessions: deathmatchSessions.length,
+    deathmatchTrend,
+    deathmatchWeapons,
+    totalRankedMatches: sum(completed.map((session) => session.ranked_matches)),
+    rankedWeeks,
+    currentWeekRanked,
+    rankedTargetPercent: Math.min(100, percent(currentWeekRanked, 14)),
+    currentRankedTargetStreak: rankedStreaks.current,
+    bestRankedTargetStreak: rankedStreaks.best,
+    averageRankedPerActiveWeek: average(rankedWeeks.filter((week) => week.matches > 0).map((week) => week.matches)),
     averageConfidenceChange: average(confidence.map((session) => (session.confidence_after ?? 0) - (session.confidence_before ?? 0))),
     averageWarmupHits: average(warmupResults.map((session) => session.warmup_hits ?? 0)),
     averageMicroflickHits: average(microflickResults.map((session) => session.microflick_hits ?? 0)),
@@ -121,6 +143,10 @@ function calculateStreak(dates: string[], current: boolean) {
 function averageDateGap(dates: string[]) { return dates.length < 2 ? 0 : average(dates.slice(1).map((date, index) => { const previous = dates[index]; return previous ? daysBetween(previous, date) : 0; })); }
 function daysBetween(a: string, b: string) { return Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000); }
 function startOfWeek(date: string) { const value = new Date(`${date}T00:00:00Z`); const offset = (value.getUTCDay() + 6) % 7; value.setUTCDate(value.getUTCDate() - offset); return value.toISOString().slice(0, 10); }
+function buildRankedWeeks(sessions: RoutineAnalyticsSession[]) { const weeks = new Map<string, number>(); for (const session of sessions) { if (!session.session_date) continue; const week = startOfWeek(session.session_date); weeks.set(week, (weeks.get(week) ?? 0) + session.ranked_matches); } return [...weeks].map(([week, matches]) => ({ week, matches })).sort((a, b) => a.week.localeCompare(b.week)); }
+function calculateTargetStreaks(weeks: Array<{ week: string; matches: number }>) { let best = 0; let running = 0; let previous: string | null = null; for (const week of weeks) { const consecutive = previous ? daysBetween(previous, week.week) === 7 : true; running = week.matches >= 14 ? (consecutive ? running + 1 : 1) : 0; best = Math.max(best, running); previous = week.week; } return { current: running, best }; }
+function ratio(kills: number, deaths: number) { return deaths === 0 ? kills : kills / deaths; }
+function toDateString(date: Date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 10); }
 function percent(value: number, total: number) { return total ? Math.round((value / total) * 100) : 0; }
 function sum(values: number[]) { return values.reduce((total, value) => total + value, 0); }
 function average(values: number[]) { return values.length ? sum(values) / values.length : 0; }

@@ -46,7 +46,7 @@ export async function getGlobalStatisticsData() {
 
 export async function getRoutineStatisticsData(programId?: string) {
   let programsQuery = supabase.from("routine_programs").select("id, name, duration_days, start_date, status").order("created_at", { ascending: false });
-  let sessionsQuery = supabase.from("routine_sessions").select("id, routine_program_id, day_number, session_date, completed_at, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, peek_left_repetitions, peek_right_repetitions, strafe_close_repetitions, strafe_mid_repetitions, strafe_long_repetitions, practice_minutes, deathmatches, warmup_hits, microflick_hits, deathmatch_kills, deathmatch_deaths, deathmatch_weapon, perceived_difficulty, confidence_before, confidence_after, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe").order("session_date");
+  let sessionsQuery = supabase.from("routine_sessions").select("id, routine_program_id, day_number, session_date, completed_at, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, peek_left_repetitions, peek_right_repetitions, strafe_close_repetitions, strafe_mid_repetitions, strafe_long_repetitions, practice_minutes, deathmatches, ranked_matches, warmup_hits, microflick_hits, deathmatch_kills, deathmatch_deaths, deathmatch_weapon, perceived_difficulty, confidence_before, confidence_after, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe").order("session_date");
   if (programId) {
     programsQuery = programsQuery.eq("id", programId);
     sessionsQuery = sessionsQuery.eq("routine_program_id", programId);

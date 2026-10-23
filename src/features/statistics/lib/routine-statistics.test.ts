@@ -4,7 +4,7 @@ import { buildRoutineStatistics, type RoutineAnalyticsSession } from "@/features
 const session = (day: number, score: number): RoutineAnalyticsSession => ({
   id: String(day), routine_program_id: "program", day_number: day, session_date: `2026-10-${String(day).padStart(2, "0")}`,
   completed_at: `2026-10-${String(day).padStart(2, "0")}T12:00:00Z`, flick_warmup_minutes: 3, overaim_bots: score,
-  underaim_bots: score, flick_bots: score, microflick_minutes: 3, practice_minutes: 30, deathmatches: 1,
+  underaim_bots: score, flick_bots: score, microflick_minutes: 3, practice_minutes: 30, deathmatches: 1, ranked_matches: 2,
   peek_left_repetitions: 20, peek_right_repetitions: 20, strafe_close_repetitions: 60, strafe_mid_repetitions: 60, strafe_long_repetitions: 60,
   warmup_hits: null, microflick_hits: null, deathmatch_kills: 20, deathmatch_deaths: 10, perceived_difficulty: 3,
   confidence_before: 2, confidence_after: 4, shooting_error_graph: true, stop_before_shooting: true, no_crouch_spray: true, burst_strafe: true,
@@ -18,6 +18,9 @@ describe("buildRoutineStatistics", () => {
     expect(result.trends[0]?.changePercent).toBe(60);
     expect(result.completionRate).toBe(100);
     expect(result.routineKd).toBe(2);
+    expect(result.totalRankedMatches).toBe(12);
+    expect(result.deathmatchTrend).toHaveLength(6);
+    expect(result.deathmatchWeapons[0]?.name).toBe("Not specified");
   });
 
   it("does not create improvement claims without three sessions", () => {
