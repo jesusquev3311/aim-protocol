@@ -64,7 +64,8 @@ Environment variable changes only affect new deployments, so redeploy the projec
 - Username, email, and password management with current-password confirmation
 - Challenge completion summary and persistent achievements
 - K/D trends, weapon comparisons, skill self-evaluations, and improvement insights
-- Flexible 7-, 15-, or 30-session Routine Programs with actual completion dates, timer-derived session duration capped at 45 minutes, actual bot scores, gunfight-hygiene tracking, and preserved history
+- Flexible 7-, 15-, or 30-session Routine Programs with actual completion dates, timer-derived session duration capped at 45 minutes, bot scores, optional accuracy and Deathmatch context, and gunfight-hygiene tracking
+- Per-program and global routine analytics with rolling mechanical trends, baseline comparisons, consistency, adherence, date/program filters, and routine-to-Deathmatch associations
 
 ## Available Commands
 

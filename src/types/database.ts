@@ -160,6 +160,8 @@ export type Database = {
           id: string; user_id: string; routine_program_id: string | null; day_number: number | null; session_date: string | null;
           flick_warmup_minutes: number; overaim_bots: number; underaim_bots: number; flick_bots: number;
           microflick_minutes: number; practice_minutes: number; deathmatches: number; ranked_matches: number;
+          warmup_hits: number | null; microflick_hits: number | null; deathmatch_kills: number | null; deathmatch_deaths: number | null;
+          deathmatch_weapon: string | null; perceived_difficulty: number | null; confidence_before: number | null; confidence_after: number | null; session_focus: string | null;
           shooting_error_graph: boolean; stop_before_shooting: boolean; no_crouch_spray: boolean; burst_strafe: boolean;
           notes: string | null; started_at: string | null; completed_at: string | null; created_at: string; updated_at: string;
         };
@@ -167,12 +169,16 @@ export type Database = {
           id?: string; user_id: string; routine_program_id?: string | null; day_number?: number | null; session_date?: string | null;
           flick_warmup_minutes?: number; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
+          warmup_hits?: number | null; microflick_hits?: number | null; deathmatch_kills?: number | null; deathmatch_deaths?: number | null;
+          deathmatch_weapon?: string | null; perceived_difficulty?: number | null; confidence_before?: number | null; confidence_after?: number | null; session_focus?: string | null;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; created_at?: string; updated_at?: string;
         };
         Update: {
           routine_program_id?: string | null; day_number?: number | null; session_date?: string | null; flick_warmup_minutes?: number; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
+          warmup_hits?: number | null; microflick_hits?: number | null; deathmatch_kills?: number | null; deathmatch_deaths?: number | null;
+          deathmatch_weapon?: string | null; perceived_difficulty?: number | null; confidence_before?: number | null; confidence_after?: number | null; session_focus?: string | null;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; updated_at?: string;
         };

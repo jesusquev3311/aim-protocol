@@ -1,13 +1,38 @@
 import { BarChart3, Crosshair, Gamepad2, TrendingUp } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGlobalStatistics } from "@/features/statistics/hooks/use-statistics";
+import { useGlobalStatistics, useRoutineStatistics } from "@/features/statistics/hooks/use-statistics";
+import { buildRoutineStatistics } from "@/features/statistics/lib/routine-statistics";
+import { RoutineStatisticsContent } from "@/features/statistics/pages/routine-statistics-content";
 
 export function StatisticsPage() {
   const query = useGlobalStatistics();
   if (query.isPending) return <p className="text-sm text-muted-foreground">Analyzing your training…</p>;
   if (query.isError) return <p role="alert" className="text-sm text-red-400">Could not load analytics.</p>;
-  return <StatisticsContent stats={query.data} title="Global performance" description="Trends across all of your challenges, matches, and skill evaluations." />;
+  return <div className="space-y-12"><StatisticsContent stats={query.data} title="Global performance" description="Trends across all of your challenges, matches, and skill evaluations." /><GlobalRoutineAnalytics challengeDays={query.data.dayScores} /></div>;
 }
+
+function GlobalRoutineAnalytics({ challengeDays }: { challengeDays: StatisticsResult["dayScores"] }) {
+  const query = useRoutineStatistics();
+  const [programId, setProgramId] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const filtered = useMemo(() => {
+    if (!query.data) return [];
+    return query.data.sessions.filter((session) => (programId === "all" || session.routine_program_id === programId) && (!fromDate || (session.session_date ?? "") >= fromDate) && (!toDate || (session.session_date ?? "") <= toDate));
+  }, [fromDate, programId, query.data, toDate]);
+  if (query.isPending) return <p className="text-sm text-muted-foreground">Analyzing routine history…</p>;
+  if (query.isError) return <p role="alert" className="text-sm text-red-400">Could not load routine analytics.</p>;
+  const target = programId === "all" ? query.data.programs.reduce((total, program) => total + program.duration_days, 0) : query.data.programs.find((program) => program.id === programId)?.duration_days ?? filtered.length;
+  const statistics = buildRoutineStatistics(filtered, target);
+  const routineDates = new Set(statistics.activityDates);
+  const routineDayKd = challengeDays.filter((day) => day.completedAt && routineDates.has(day.completedAt.slice(0, 10))).map((day) => day.averageKd);
+  const otherDayKd = challengeDays.filter((day) => day.completedAt && !routineDates.has(day.completedAt.slice(0, 10))).map((day) => day.averageKd);
+  const routineAverage = average(routineDayKd); const otherAverage = average(otherDayKd);
+  return <section className="space-y-6 border-t pt-10"><div><p className="text-sm font-semibold uppercase tracking-widest text-primary">Routine analytics</p><h2 className="mt-2 text-3xl font-bold">Training consistency and mechanics</h2><p className="mt-2 text-muted-foreground">Filter across Routine Programs and actual completion dates.</p></div><div className="grid gap-4 rounded-lg border bg-card p-5 sm:grid-cols-3"><label className="space-y-2 text-sm"><span className="font-medium">Routine Program</span><select value={programId} onChange={(event) => setProgramId(event.target.value)} className="h-10 w-full rounded-md border bg-background px-3"><option value="all">All programs</option>{query.data.programs.map((program) => <option key={program.id} value={program.id}>{program.name}</option>)}</select></label><label className="space-y-2 text-sm"><span className="font-medium">From</span><input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} className="h-10 w-full rounded-md border bg-background px-3" /></label><label className="space-y-2 text-sm"><span className="font-medium">To</span><input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} className="h-10 w-full rounded-md border bg-background px-3" /></label></div>{routineDayKd.length > 0 && otherDayKd.length > 0 && <Card className="border-primary/30"><CardHeader><CardTitle>Routine and Deathmatch association</CardTitle><CardDescription>This is an observed association, not proof that the routine caused the result.</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{routineAverage.toFixed(2)} K/D on routine days</p><p className="mt-2 text-sm text-muted-foreground">Compared with {otherAverage.toFixed(2)} K/D on other recorded training days across {routineDayKd.length + otherDayKd.length} days.</p></CardContent></Card>}<RoutineStatisticsContent statistics={statistics} /></section>;
+}
+
+function average(values: number[]) { return values.length ? values.reduce((total, value) => total + value, 0) / values.length : 0; }
 
 export type StatisticsResult = NonNullable<ReturnType<typeof useGlobalStatistics>["data"]>;
 
