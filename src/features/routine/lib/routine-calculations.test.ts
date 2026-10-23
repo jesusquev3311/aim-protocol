@@ -3,13 +3,13 @@ import { calculateRoutineProgress, calculateWeeklyRanked } from "@/features/rout
 
 describe("routine calculations", () => {
   it("treats bot values as scores from a 30-bot run", () => {
-    const maximumResult = { flickWarmupMinutes: 3, overaimBots: 30, underaimBots: 30, flickBots: 30, microflickMinutes: 3, practiceMinutes: 30 };
+    const maximumResult = { flickWarmupMinutes: 3, overaimBots: 30, underaimBots: 30, flickBots: 30, microflickMinutes: 3, peekLeftRepetitions: 20, peekRightRepetitions: 20, strafeCloseRepetitions: 60, strafeMidRepetitions: 60, strafeLongRepetitions: 60, practiceMinutes: 30 };
     expect(calculateRoutineProgress(maximumResult)).toBe(100);
-    expect(calculateRoutineProgress({ ...maximumResult, overaimBots: 15 })).toBe(92);
+    expect(calculateRoutineProgress({ ...maximumResult, overaimBots: 15 })).toBe(94);
   });
 
   it("treats cleared numeric inputs as zero instead of returning NaN", () => {
-    expect(calculateRoutineProgress({ flickWarmupMinutes: Number.NaN, overaimBots: Number.NaN, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0 })).toBe(0);
+    expect(calculateRoutineProgress({ flickWarmupMinutes: Number.NaN, overaimBots: Number.NaN, underaimBots: 0, flickBots: 0, microflickMinutes: 0, peekLeftRepetitions: 0, peekRightRepetitions: 0, strafeCloseRepetitions: 0, strafeMidRepetitions: 0, strafeLongRepetitions: 0, practiceMinutes: 0 })).toBe(0);
   });
 
   it("counts ranked matches only inside the selected calendar week", () => {

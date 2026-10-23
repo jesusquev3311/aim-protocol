@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { RoutineValues } from "@/features/routine/schemas/routine-schema";
 import type { RoutineProgramValues } from "@/features/routine/schemas/routine-program-schema";
 
-const sessionFields = "id, user_id, routine_program_id, day_number, session_date, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, practice_minutes, deathmatches, ranked_matches, warmup_hits, microflick_hits, deathmatch_kills, deathmatch_deaths, deathmatch_weapon, perceived_difficulty, confidence_before, confidence_after, session_focus, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe, notes, started_at, completed_at, created_at, updated_at" as const;
+const sessionFields = "id, user_id, routine_program_id, day_number, session_date, flick_warmup_minutes, overaim_bots, underaim_bots, flick_bots, microflick_minutes, peek_left_repetitions, peek_right_repetitions, strafe_close_repetitions, strafe_mid_repetitions, strafe_long_repetitions, practice_minutes, deathmatches, ranked_matches, warmup_hits, microflick_hits, deathmatch_kills, deathmatch_deaths, deathmatch_weapon, perceived_difficulty, confidence_before, confidence_after, session_focus, shooting_error_graph, stop_before_shooting, no_crouch_spray, burst_strafe, notes, started_at, completed_at, created_at, updated_at" as const;
 const programFields = "id, user_id, name, start_date, duration_days, weekdays, status, completed_at, created_at" as const;
 
 export async function getRoutinePrograms() {
@@ -55,6 +55,11 @@ export async function saveRoutineSession({ sessionId, values }: { sessionId: str
     underaim_bots: values.underaimBots,
     flick_bots: values.flickBots,
     microflick_minutes: values.microflickMinutes,
+    peek_left_repetitions: values.peekLeftRepetitions,
+    peek_right_repetitions: values.peekRightRepetitions,
+    strafe_close_repetitions: values.strafeCloseRepetitions,
+    strafe_mid_repetitions: values.strafeMidRepetitions,
+    strafe_long_repetitions: values.strafeLongRepetitions,
     deathmatches: values.deathmatches,
     ranked_matches: values.rankedMatches,
     warmup_hits: values.warmupHits,

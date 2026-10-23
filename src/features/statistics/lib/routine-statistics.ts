@@ -9,6 +9,11 @@ export type RoutineAnalyticsSession = {
   underaim_bots: number;
   flick_bots: number;
   microflick_minutes: number;
+  peek_left_repetitions: number;
+  peek_right_repetitions: number;
+  strafe_close_repetitions: number;
+  strafe_mid_repetitions: number;
+  strafe_long_repetitions: number;
   practice_minutes: number;
   deathmatches: number;
   warmup_hits: number | null;
@@ -55,6 +60,8 @@ export function buildRoutineStatistics(sessions: RoutineAnalyticsSession[], targ
     { name: "Underaim run", percentage: percent(completed.filter((session) => session.underaim_bots > 0).length, completed.length) },
     { name: "Flick run", percentage: percent(completed.filter((session) => session.flick_bots > 0).length, completed.length) },
     { name: "Microflicks", percentage: percent(completed.filter((session) => session.microflick_minutes >= 3).length, completed.length) },
+    { name: "Peek + shoot", percentage: percent(completed.filter((session) => session.peek_left_repetitions >= 20 && session.peek_right_repetitions >= 20).length, completed.length) },
+    { name: "A/D shooting", percentage: percent(completed.filter((session) => session.strafe_close_repetitions >= 60 && session.strafe_mid_repetitions >= 60 && session.strafe_long_repetitions >= 60).length, completed.length) },
     { name: "30-minute session", percentage: percent(completed.filter((session) => session.practice_minutes >= 30).length, completed.length) },
   ];
   const deathmatchSessions = completed.filter((session) => session.deathmatch_kills !== null && session.deathmatch_deaths !== null);

@@ -1,10 +1,14 @@
-type RoutineProgressInput = { flickWarmupMinutes: number; overaimBots: number; underaimBots: number; flickBots: number; microflickMinutes: number; practiceMinutes: number };
+type RoutineProgressInput = { flickWarmupMinutes: number; overaimBots: number; underaimBots: number; flickBots: number; microflickMinutes: number; peekLeftRepetitions: number; peekRightRepetitions: number; strafeCloseRepetitions: number; strafeMidRepetitions: number; strafeLongRepetitions: number; practiceMinutes: number };
 type RoutineHistoryItem = { session_date: string; ranked_matches: number; completed_at: string | null };
 
 export function calculateRoutineProgress(values: RoutineProgressInput) {
-  const ratios = [safeRatio(values.flickWarmupMinutes, 3), safeRatio(values.overaimBots, 30), safeRatio(values.underaimBots, 30), safeRatio(values.flickBots, 30), safeRatio(values.microflickMinutes, 3), safeRatio(values.practiceMinutes, 30)];
+  const peekRatio = average([safeRatio(values.peekLeftRepetitions, 20), safeRatio(values.peekRightRepetitions, 20)]);
+  const strafeRatio = average([safeRatio(values.strafeCloseRepetitions, 60), safeRatio(values.strafeMidRepetitions, 60), safeRatio(values.strafeLongRepetitions, 60)]);
+  const ratios = [safeRatio(values.flickWarmupMinutes, 3), safeRatio(values.overaimBots, 30), safeRatio(values.underaimBots, 30), safeRatio(values.flickBots, 30), safeRatio(values.microflickMinutes, 3), peekRatio, strafeRatio, safeRatio(values.practiceMinutes, 30)];
   return Math.round((ratios.reduce((sum, ratio) => sum + Math.min(1, ratio), 0) / ratios.length) * 100);
 }
+
+function average(values: number[]) { return values.reduce((sum, value) => sum + value, 0) / values.length; }
 
 function safeRatio(value: number, target: number) {
   return Number.isFinite(value) && value > 0 ? value / target : 0;
