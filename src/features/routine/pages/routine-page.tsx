@@ -11,7 +11,7 @@ import { useFinishRoutineDay, useRoutineSessionById, useSaveRoutineSession, useS
 import { calculateRoutineProgress } from "@/features/routine/lib/routine-calculations";
 import { routineSchema, type RoutineValues } from "@/features/routine/schemas/routine-schema";
 
-const emptyRoutine = (date: string): RoutineValues => ({ sessionDate: date, overaimBots: 0, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0, deathmatches: 0, rankedMatches: 0, shootingErrorGraph: false, stopBeforeShooting: false, noCrouchSpray: false, burstStrafe: false, notes: "" });
+const emptyRoutine = (): RoutineValues => ({ overaimBots: 0, underaimBots: 0, flickBots: 0, microflickMinutes: 0, practiceMinutes: 0, deathmatches: 0, rankedMatches: 0, shootingErrorGraph: false, stopBeforeShooting: false, noCrouchSpray: false, burstStrafe: false, notes: "" });
 
 export function RoutineDetailPage() {
   const { programId = "", sessionId = "" } = useParams();
@@ -20,16 +20,16 @@ export function RoutineDetailPage() {
   const finishMutation = useFinishRoutineDay();
   const startMutation = useStartRoutineSession();
   const [now, setNow] = useState(Date.now());
-  const { register, handleSubmit, reset, watch, formState: { errors, isDirty } } = useForm<RoutineValues>({ resolver: zodResolver(routineSchema), defaultValues: emptyRoutine("") });
+  const { register, handleSubmit, reset, watch, formState: { errors, isDirty } } = useForm<RoutineValues>({ resolver: zodResolver(routineSchema), defaultValues: emptyRoutine() });
 
   useEffect(() => {
     const data = session.data;
     reset(data ? {
-      sessionDate: data.session_date, overaimBots: data.overaim_bots, underaimBots: data.underaim_bots, flickBots: data.flick_bots,
+      overaimBots: data.overaim_bots, underaimBots: data.underaim_bots, flickBots: data.flick_bots,
       microflickMinutes: data.microflick_minutes, practiceMinutes: data.practice_minutes, deathmatches: data.deathmatches,
       rankedMatches: data.ranked_matches, shootingErrorGraph: data.shooting_error_graph, stopBeforeShooting: data.stop_before_shooting,
       noCrouchSpray: data.no_crouch_spray, burstStrafe: data.burst_strafe, notes: data.notes ?? "",
-    } : emptyRoutine(""));
+    } : emptyRoutine());
   }, [reset, session.data]);
 
   useEffect(() => {
@@ -50,17 +50,17 @@ export function RoutineDetailPage() {
     if (!confirmed) return;
     try {
       await saveMutation.mutateAsync({ sessionId, values: formValues });
-      await finishMutation.mutateAsync(sessionId);
+      await finishMutation.mutateAsync({ sessionId, performedOn: getLocalDate() });
     } catch {
       // Mutation feedback is rendered below.
     }
   };
 
-  return <section className="space-y-8"><div><Link to={`/routines/${programId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Routine Program</Link><div className="mt-6"><p className="text-sm font-semibold uppercase tracking-widest text-primary">Routine day {session.data.day_number}</p><h1 className="mt-2 text-3xl font-bold">30-minute mechanics protocol</h1><p className="mt-2 max-w-3xl text-muted-foreground">{formatLongDate(session.data.session_date)} · Start timing before the Range exercises, then play Deathmatch until the whole session reaches approximately 30 minutes.</p></div></div>
+  return <section className="space-y-8"><div><Link to={`/routines/${programId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Routine Program</Link><div className="mt-6"><p className="text-sm font-semibold uppercase tracking-widest text-primary">Routine day {session.data.day_number}</p><h1 className="mt-2 text-3xl font-bold">30-minute mechanics protocol</h1><p className="mt-2 max-w-3xl text-muted-foreground">{session.data.session_date ? `Completed ${formatLongDate(session.data.session_date)} · ` : ""}Start timing before the Range exercises, then play Deathmatch until the whole session reaches approximately 30 minutes.</p></div></div>
     <div className="grid gap-4 sm:grid-cols-2"><Metric icon={<Timer />} label="Routine result" value={`${progress}%`} detail={dayFinished ? "Day finished · result recorded" : "Session still open"} /><Metric icon={<Play />} label="Whole-session timer" value={session.data.started_at ? formatElapsed(session.data.started_at, session.data.completed_at, now) : "Not started"} detail={session.data.started_at ? `Started at ${formatStartTime(session.data.started_at)} · target 30:00` : "Includes Range, microflicks, and Deathmatch"} /></div>
     {!session.data.started_at && <Card className="border-primary/30"><CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6"><div><p className="font-semibold">Start the complete training session</p><p className="mt-1 text-sm text-muted-foreground">Start this before exercise 1. Deathmatch is the final portion of the same 30-minute session.</p></div><Button type="button" disabled={startMutation.isPending} onClick={() => startMutation.mutate(sessionId)}><Play className="mr-2 h-4 w-4" />{startMutation.isPending ? "Starting…" : "Start routine"}</Button></CardContent></Card>}
     <Card className={dayFinished ? "border-emerald-500/40" : "border-primary/30"}><CardContent className="pt-6"><div className="mb-2 flex justify-between text-sm"><span>{dayFinished ? "Day finished · achieved result recorded" : "Current routine result"}</span><span>{progress}%</span></div><div className="h-3 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full transition-all ${dayFinished ? "bg-emerald-500" : "bg-primary"}`} style={{ width: `${progress}%` }} /></div>{dayFinished && session.data?.completed_at && <p className="mt-3 text-xs text-muted-foreground">Finished {new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(session.data.completed_at))}</p>}</CardContent></Card>
-    <form className="space-y-6" onSubmit={handleSubmit(save)}><input type="hidden" {...register("sessionDate")} />
+    <form className="space-y-6" onSubmit={handleSubmit(save)}>
       <div className="grid gap-5 lg:grid-cols-2">
         <DrillCard number="01" title="Overaim + correction" target="One Easy run · 30 bots maximum · Vandal" description="Pass the head, correct back, stop completely, then fire." icon={<Crosshair />}><NumberField id="overaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.overaimBots?.message} input={register("overaimBots", { valueAsNumber: true })} /></DrillCard>
         <DrillCard number="02" title="Underaim + movement" target="One Easy run · 30 bots maximum" description="Stop short with the mouse and use lateral movement to finish the alignment." icon={<MoveHorizontal />}><NumberField id="underaimBots" label="Bots killed" target="Score: 0–30" max={30} error={errors.underaimBots?.message} input={register("underaimBots", { valueAsNumber: true })} /></DrillCard>
@@ -81,3 +81,4 @@ function Metric({ icon, label, value, detail }: { icon: React.ReactNode; label: 
 function formatLongDate(date: string) { return new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(new Date(`${date}T00:00:00`)); }
 function formatStartTime(date: string) { return new Intl.DateTimeFormat("en", { hour: "numeric", minute: "2-digit" }).format(new Date(date)); }
 function formatElapsed(startedAt: string, completedAt: string | null, now: number) { const elapsedSeconds = Math.max(0, Math.floor(((completedAt ? new Date(completedAt).getTime() : now) - new Date(startedAt).getTime()) / 1_000)); const minutes = Math.floor(elapsedSeconds / 60); const seconds = elapsedSeconds % 60; return `${minutes}:${seconds.toString().padStart(2, "0")}`; }
+function getLocalDate() { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10); }

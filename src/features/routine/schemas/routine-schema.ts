@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const routineSchema = z.object({
-  sessionDate: z.string().min(1, "Choose a session date."),
   overaimBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),
   underaimBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),
   flickBots: z.number().int().min(0).max(30, "The Easy run contains at most 30 bots."),

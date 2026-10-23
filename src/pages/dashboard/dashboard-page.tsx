@@ -33,22 +33,15 @@ export function DashboardPage() {
 }
 
 function CurrentRoutine() {
-  const today = getLocalDate();
   const query = useActiveRoutineProgram();
   if (query.isPending) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Loading Routine Program…</CardContent></Card>;
   if (query.isError) return <Card><CardContent className="pt-6 text-sm text-red-400">Could not load the active Routine Program.</CardContent></Card>;
-  if (!query.data) return <Card className="border-dashed"><CardHeader className="flex flex-row items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" /><CardTitle>No active Routine Program</CardTitle></div><CardDescription className="mt-2">Create a scheduled 7-, 15-, or 30-day mechanics program.</CardDescription></div><Link to="/routines" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-semibold">View routines<ChevronRight className="h-4 w-4" /></Link></CardHeader></Card>;
+  if (!query.data) return <Card className="border-dashed"><CardHeader className="flex flex-row items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" /><CardTitle>No active Routine Program</CardTitle></div><CardDescription className="mt-2">Create a flexible 7-, 15-, or 30-session mechanics program.</CardDescription></div><Link to="/routines" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-semibold">View routines<ChevronRight className="h-4 w-4" /></Link></CardHeader></Card>;
   const { program, days } = query.data;
   const completed = days.filter((day) => day.completed_at).length;
   const progress = days.length ? Math.round((completed / days.length) * 100) : 0;
-  const todaySession = days.find((day) => day.session_date === today);
-  const nextSession = todaySession ?? days.find((day) => !day.completed_at && day.session_date >= today) ?? days.find((day) => !day.completed_at);
-  return <Card className="border-primary/30"><CardHeader className="flex flex-row items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" /><CardTitle>{program.name}</CardTitle></div><CardDescription className="mt-2">Active Routine Program · the 30 minutes include every exercise and Deathmatch.</CardDescription></div><Link to="/routines" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">View Routine Programs<ChevronRight className="h-4 w-4" /></Link></CardHeader><CardContent className="space-y-4"><div className="grid gap-4 sm:grid-cols-3"><Metric icon={<Target className="h-5 w-5 text-primary" />} label="Program progress" value={`${completed} / ${days.length} days`} /><Metric icon={<Gamepad2 className="h-5 w-5 text-primary" />} label="Total practice" value={`${days.reduce((sum, day) => sum + day.practice_minutes, 0)} min`} /><Metric icon={<CheckCircle2 className="h-5 w-5 text-primary" />} label="Next session" value={nextSession ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(`${nextSession.session_date}T00:00:00`)) : "Complete"} /></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div></CardContent></Card>;
-}
-
-function getLocalDate() {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+  const nextSession = days.find((day) => !day.completed_at);
+  return <Card className="border-primary/30"><CardHeader className="flex flex-row items-start justify-between gap-4"><div><div className="flex items-center gap-2"><Dumbbell className="h-5 w-5 text-primary" /><CardTitle>{program.name}</CardTitle></div><CardDescription className="mt-2">Active Routine Program · complete sessions at your own pace.</CardDescription></div><Link to="/routines" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground">View Routine Programs<ChevronRight className="h-4 w-4" /></Link></CardHeader><CardContent className="space-y-4"><div className="grid gap-4 sm:grid-cols-3"><Metric icon={<Target className="h-5 w-5 text-primary" />} label="Program progress" value={`${completed} / ${days.length} days`} /><Metric icon={<Gamepad2 className="h-5 w-5 text-primary" />} label="Total practice" value={`${days.reduce((sum, day) => sum + day.practice_minutes, 0)} min`} /><Metric icon={<CheckCircle2 className="h-5 w-5 text-primary" />} label="Next session" value={nextSession ? `Session ${nextSession.day_number}` : "Complete"} /></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div></CardContent></Card>;
 }
 
 type Challenge = NonNullable<ReturnType<typeof useChallenges>["data"]>[number];

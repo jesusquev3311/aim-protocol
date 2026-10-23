@@ -157,21 +157,21 @@ export type Database = {
       };
       routine_sessions: {
         Row: {
-          id: string; user_id: string; routine_program_id: string | null; day_number: number | null; session_date: string;
+          id: string; user_id: string; routine_program_id: string | null; day_number: number | null; session_date: string | null;
           overaim_bots: number; underaim_bots: number; flick_bots: number;
           microflick_minutes: number; practice_minutes: number; deathmatches: number; ranked_matches: number;
           shooting_error_graph: boolean; stop_before_shooting: boolean; no_crouch_spray: boolean; burst_strafe: boolean;
           notes: string | null; started_at: string | null; completed_at: string | null; created_at: string; updated_at: string;
         };
         Insert: {
-          id?: string; user_id: string; routine_program_id?: string | null; day_number?: number | null; session_date: string;
+          id?: string; user_id: string; routine_program_id?: string | null; day_number?: number | null; session_date?: string | null;
           overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; created_at?: string; updated_at?: string;
         };
         Update: {
-          routine_program_id?: string | null; day_number?: number | null; session_date?: string; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
+          routine_program_id?: string | null; day_number?: number | null; session_date?: string | null; overaim_bots?: number; underaim_bots?: number; flick_bots?: number;
           microflick_minutes?: number; practice_minutes?: number; deathmatches?: number; ranked_matches?: number;
           shooting_error_graph?: boolean; stop_before_shooting?: boolean; no_crouch_spray?: boolean; burst_strafe?: boolean;
           notes?: string | null; started_at?: string | null; completed_at?: string | null; updated_at?: string;
@@ -198,9 +198,9 @@ export type Database = {
       finish_challenge: { Args: { p_challenge_id: string }; Returns: undefined };
       reset_challenge: { Args: { p_challenge_id: string; p_start_date: string }; Returns: undefined };
       finish_routine_session: { Args: { p_session_date: string }; Returns: string };
-      create_routine_program: { Args: { p_name: string; p_start_date: string; p_duration_days: number; p_weekdays: number[] }; Returns: string };
+      create_routine_program: { Args: { p_name: string; p_start_date: string; p_duration_days: number }; Returns: string };
       start_routine_session: { Args: { p_session_id: string }; Returns: string };
-      finish_routine_day: { Args: { p_session_id: string }; Returns: string };
+      finish_routine_day: { Args: { p_session_id: string; p_performed_on: string }; Returns: string };
       finish_routine_program: { Args: { p_program_id: string }; Returns: undefined };
     };
     Enums: Record<string, never>;

@@ -31,7 +31,7 @@ export async function getActiveRoutineProgram() {
 }
 
 export async function createRoutineProgram(values: RoutineProgramValues) {
-  const { data, error } = await supabase.rpc("create_routine_program", { p_name: values.name, p_start_date: values.startDate, p_duration_days: values.durationDays, p_weekdays: values.weekdays });
+  const { data, error } = await supabase.rpc("create_routine_program", { p_name: values.name, p_start_date: values.startDate, p_duration_days: values.durationDays });
   if (error) throw error;
   return data;
 }
@@ -73,8 +73,8 @@ export async function startRoutineSession(sessionId: string) {
   return data;
 }
 
-export async function finishRoutineDay(sessionId: string) {
-  const { data, error } = await supabase.rpc("finish_routine_day", { p_session_id: sessionId });
+export async function finishRoutineDay({ sessionId, performedOn }: { sessionId: string; performedOn: string }) {
+  const { data, error } = await supabase.rpc("finish_routine_day", { p_session_id: sessionId, p_performed_on: performedOn });
   if (error) throw error;
   return data;
 }
